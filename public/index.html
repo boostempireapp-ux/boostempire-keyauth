@@ -13,7 +13,8 @@
   --p:#8b5cf6;--p2:#6d28d9;--p3:#a78bfa;--p4:#c4b5fd;--p5:#7c3aed;
   --pdim:rgba(139,92,246,0.12);--p2dim:rgba(109,40,217,0.12);
   --text:#e8e8ff;--text2:#9090c0;--text3:#4a4a7a;
-  --r:10px;--r2:14px;--sb:225px;
+  --r:10px;--r2:14px;--sb:230px;
+--gold:#f59e0b;--golddim:rgba(245,158,11,0.12);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden}
@@ -389,6 +390,43 @@ tbody td{padding:9px 13px;vertical-align:middle;}
   background:#4a4a7a;border-radius:50%;transition:.2s;}
 .toggle-switch input:checked+.toggle-slider{background:var(--p);}
 .toggle-switch input:checked+.toggle-slider::before{transform:translateX(16px);background:#fff;}
+
+.btn-gold{background:linear-gradient(135deg,#f59e0b,#d97706);color:#000;font-weight:700;}
+.btn-gold:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(245,158,11,0.35);}
+.login-tabs{display:flex;border:1px solid var(--border2);border-radius:var(--r);overflow:hidden;margin-bottom:20px;}
+.login-tab{flex:1;padding:9px;font-size:12px;font-weight:600;cursor:pointer;color:var(--text3);transition:all .15s;text-align:center;}
+.login-tab.active{background:var(--pdim);color:var(--p3);}
+.modal-wide{width:700px;}
+.perm-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
+.perm-item{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;transition:border-color .15s;}
+.perm-item.on{border-color:rgba(139,92,246,0.35);background:rgba(139,92,246,0.04);}
+.perm-label{font-size:11px;color:var(--text2);}
+.perm-label small{font-size:9px;color:var(--text3);display:block;margin-top:1px;}
+.toggle{width:36px;height:20px;border-radius:10px;background:var(--bg4);border:1px solid var(--border);cursor:pointer;position:relative;transition:all .2s;flex-shrink:0;}
+.toggle.on{background:var(--p);border-color:var(--p);}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .2s;}
+.toggle.on::after{transform:translateX(16px);}
+.reseller-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:16px 18px;margin-bottom:10px;transition:border-color .2s;}
+.reseller-card.gld{border-color:rgba(245,158,11,0.2);}
+.quota-bar{height:4px;background:var(--bg4);border-radius:2px;overflow:hidden;margin-top:5px;}
+.quota-fill{height:100%;border-radius:2px;background:var(--gold);transition:width .6s ease;}
+.perm-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:4px;font-size:9px;font-weight:700;text-transform:uppercase;}
+.perm-badge.yes{background:rgba(139,92,246,0.12);color:var(--p3);}
+.perm-badge.no{background:rgba(74,74,122,0.1);color:var(--text3);}
+.b-gold{background:rgba(245,158,11,0.12);color:#f59e0b;border:1px solid rgba(245,158,11,0.25);}
+.b-gold::before{background:#f59e0b;}
+.b-suspended{background:rgba(239,68,68,0.1);color:#fca5a5;border:1px solid rgba(239,68,68,0.2);}
+.b-suspended::before{background:#ef4444;}
+.notice{padding:10px 14px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:8px;font-size:11px;color:#d97706;margin-bottom:14px;line-height:1.7;}
+.nav-item.r-item{color:var(--gold);}
+.nav-item.r-item:hover{color:#fbbf24;background:rgba(245,158,11,0.06);}
+.nav-item.r-item.active{color:#fbbf24;border-left-color:var(--gold);background:linear-gradient(90deg,rgba(245,158,11,0.08) 0%,transparent 100%);}
+.user-role.gold{color:var(--gold);}
+.rh-bar{background:linear-gradient(135deg,rgba(245,158,11,0.08) 0%,rgba(0,0,0,0) 100%);border:1px solid rgba(245,158,11,0.2);border-radius:var(--r2);padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;}
+.rh-name{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;color:var(--gold);}
+.rh-tag{background:rgba(245,158,11,0.12);color:var(--gold);border:1px solid rgba(245,158,11,0.25);border-radius:20px;padding:3px 12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;}
+.pt .gold{color:var(--gold);}
+
 </style>
 </head>
 <body>
@@ -399,8 +437,19 @@ tbody td{padding:9px 13px;vertical-align:middle;}
     <img src="logo.png" class="login-logo-img" alt="BoostEmpire"/>
     <span class="brand-big">BOOSTEMPIRE</span>
     <span class="brand-sub">KeyAuth System</span>
-    <input class="inp" type="password" id="lp" placeholder="Admin password…" onkeydown="if(event.key==='Enter')doLogin()"/>
-    <button class="btn btn-primary" onclick="doLogin()">Sign In</button>
+    <div class="login-tabs">
+      <div class="login-tab active" id="lt-admin" onclick="switchLoginTab('admin')">👑 Admin</div>
+      <div class="login-tab" id="lt-reseller" onclick="switchLoginTab('reseller')">🔑 Reseller</div>
+    </div>
+    <div id="login-admin-form">
+      <input class="inp" type="password" id="lp" placeholder="Admin password…" onkeydown="if(event.key==='Enter')doLogin()"/>
+      <button class="btn btn-primary" onclick="doLogin()">Sign In as Admin</button>
+    </div>
+    <div id="login-reseller-form" style="display:none">
+      <input class="inp" type="text" id="lr-user" placeholder="Username…" onkeydown="if(event.key==='Enter')doResellerLogin()"/>
+      <input class="inp" type="password" id="lr-pass" placeholder="Password…" onkeydown="if(event.key==='Enter')doResellerLogin()"/>
+      <button class="btn btn-gold" onclick="doResellerLogin()">Sign In as Reseller</button>
+    </div>
     <div class="lerr" id="lerr"></div>
   </div>
 </div>
@@ -412,11 +461,11 @@ tbody td{padding:9px 13px;vertical-align:middle;}
       <img src="logo.png" class="sb-logo" alt="logo"/>
       <div class="sb-brand-wrap">
         <div class="s-brand">BOOSTEMPIRE</div>
-        <div class="s-sub">KeyAuth Panel</div>
+        <div class="s-sub" id="sb-mode-label">Admin Panel</div>
         <div class="s-status">Online</div>
       </div>
     </div>
-    <nav class="nav">
+    <nav class="nav" id="admin-nav">
       <div class="nav-sec">Overview</div>
       <div class="nav-item active" data-page="dashboard" onclick="go('dashboard')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
@@ -447,6 +496,13 @@ tbody td{padding:9px 13px;vertical-align:middle;}
         Blocked IPs
         <span class="nav-badge" id="block-badge"></span>
       </div>
+
+      <div class="nav-sec" style="color:rgba(245,158,11,0.5)">Resellers</div>
+      <div class="nav-item" data-page="resellers" onclick="go('resellers')" style="color:var(--gold)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span style="color:var(--gold)">Reseller Accounts</span>
+        <span class="nav-badge" id="reseller-badge" style="background:#d97706;display:none"></span>
+      </div>
       <div class="nav-sec">Developer</div>
       <div class="nav-item" data-page="sdk" onclick="go('sdk')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
@@ -458,10 +514,38 @@ tbody td{padding:9px 13px;vertical-align:middle;}
         Settings
       </div>
     </nav>
+
+    <!-- RESELLER NAV (shown when reseller logs in) -->
+    <nav class="nav" id="reseller-nav" style="display:none">
+      <div class="nav-sec" style="color:rgba(245,158,11,0.6)">My Dashboard</div>
+      <div class="nav-item r-item active" data-page="r-dashboard" onclick="go('r-dashboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Overview
+      </div>
+      <div class="nav-sec" id="r-nav-keys-sec" style="display:none">Keys</div>
+      <div class="nav-item r-item" data-page="r-keys" onclick="go('r-keys')" id="r-nav-keys" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+        My Keys
+      </div>
+      <div class="nav-item r-item" data-page="r-generate" onclick="go('r-generate')" id="r-nav-generate" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        Generate Keys
+      </div>
+      <div class="nav-sec" id="r-nav-mon-sec" style="display:none">Monitoring</div>
+      <div class="nav-item r-item" data-page="r-logs" onclick="go('r-logs')" id="r-nav-logs" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Auth Logs
+      </div>
+      <div class="nav-item r-item" data-page="r-blocks" onclick="go('r-blocks')" id="r-nav-blocks" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+        Blocked IPs
+      </div>
+    </nav>
+
     <div class="sb-foot">
       <div class="user-row">
-        <div class="user-av"><img src="logo.png" alt="admin"/></div>
-        <div><div class="user-name">Admin</div><div class="user-role">BoostEmpire</div></div>
+        <div class="user-av" id="sb-avatar">👑</div>
+        <div><div class="user-name" id="sb-username">Admin</div><div class="user-role" id="sb-userrole">BoostEmpire</div></div>
       </div>
       <button class="btn btn-ghost btn-sm" style="width:100%" onclick="logout()">Sign Out</button>
     </div>
@@ -489,7 +573,7 @@ tbody td{padding:9px 13px;vertical-align:middle;}
       </div>
 
       <!-- STAT CARDS -->
-      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:20px">
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:12px;margin-bottom:20px">
         <div class="dash-stat sa">
           <div class="ds-icon">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
@@ -537,6 +621,12 @@ tbody td{padding:9px 13px;vertical-align:middle;}
           <div class="ds-val" id="s-blocked">0</div>
           <div class="ds-label">Blocked IPs</div>
           <div class="ds-bar"><div class="ds-bar-fill" id="sb-blocked" style="width:0%"></div></div>
+        </div>
+        <div class="dash-stat sf" style="--da:#f59e0b">
+          <div class="ds-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+          <div class="ds-val" id="s-resellers" style="color:#f59e0b">0</div>
+          <div class="ds-label">Resellers</div>
+          <div class="ds-bar"><div class="ds-bar-fill" id="sb-resellers" style="width:0%;background:#f59e0b"></div></div>
         </div>
       </div>
 
@@ -731,7 +821,7 @@ tbody td{padding:9px 13px;vertical-align:middle;}
       <div class="card" style="padding:0;">
         <div class="tbl-wrap">
           <table>
-            <thead><tr><th>License Key</th><th>App</th><th>Label</th><th>Status</th><th>Uses</th><th>HWID</th><th>Expires</th><th>Last Auth</th><th>Actions</th></tr></thead>
+            <thead><tr><th>License Key</th><th>App</th><th>Label</th><th>Status</th><th>HWID</th><th>Created By</th><th>Expires</th><th>Last Auth</th><th>Actions</th></tr></thead>
             <tbody id="keys-body"><tr><td colspan="9"><div class="empty"><div class="empty-icon">🔑</div><div class="empty-text">No keys yet</div></div></td></tr></tbody>
           </table>
         </div>
@@ -1340,6 +1430,105 @@ Body: { <span class="cs">"key"</span>:<span class="cs">"BE-XXX"</span>, <span cl
       </div>
     </div>
 
+    <!-- ══ RESELLER MANAGEMENT (Admin) ══ -->
+    <div class="page" id="page-resellers">
+      <div class="ph">
+        <div><div class="pt">Reseller <span class="gold">Accounts</span></div><div style="font-size:11px;color:var(--text3);margin-top:3px">Create logins &amp; control exactly what each reseller can see and do</div></div>
+        <div class="pa"><button class="btn btn-ghost btn-sm" onclick="loadResellers()">↻ Refresh</button><button class="btn btn-gold" onclick="openNewResellerModal()">+ Create Reseller</button></div>
+      </div>
+      <div id="resellers-list"><div class="empty"><div class="empty-icon">👥</div><div class="empty-text">No resellers yet</div></div></div>
+    </div>
+
+    <!-- RESELLER DASHBOARD -->
+    <div class="page" id="page-r-dashboard">
+      <div class="rh-bar">
+        <div><div class="rh-name" id="r-display-name">Reseller Panel</div><div style="font-size:11px;color:var(--text3);margin-top:3px">Your personalized dashboard</div></div>
+        <div class="rh-tag">Reseller Account</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
+        <div class="dash-stat sa"><div class="ds-val" id="rs-total">0</div><div class="ds-label">My Keys</div><div class="ds-bar"><div class="ds-bar-fill" style="width:100%"></div></div></div>
+        <div class="dash-stat sb2"><div class="ds-val" id="rs-active">0</div><div class="ds-label">Active</div><div class="ds-bar"><div class="ds-bar-fill" id="rs-active-bar" style="width:0%"></div></div></div>
+        <div class="dash-stat sc"><div class="ds-val" id="rs-banned">0</div><div class="ds-label">Banned</div><div class="ds-bar"><div class="ds-bar-fill" style="width:0%"></div></div></div>
+        <div class="dash-stat sf" style="--da:#f59e0b">
+          <div class="ds-val" id="rs-quota" style="color:#f59e0b">∞</div>
+          <div class="ds-label">Key Quota</div>
+          <div class="quota-bar"><div class="quota-fill" id="rs-quota-fill" style="width:0%"></div></div>
+          <div style="font-size:9px;color:var(--text3);margin-top:4px" id="rs-quota-label"></div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="card" style="padding:0">
+          <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+            <span class="card-title">Recent Activity</span>
+            <button class="btn btn-ghost btn-sm" onclick="go('r-logs')" id="r-view-logs-btn" style="display:none;font-size:11px">View All →</button>
+          </div>
+          <div id="r-dash-activity"><div style="text-align:center;padding:36px;color:var(--text3);font-size:12px">No activity yet</div></div>
+        </div>
+        <div class="card" style="padding:16px 18px">
+          <div class="card-title" style="margin-bottom:14px">🛡️ Your Permissions</div>
+          <div id="r-permissions-display" style="display:grid;grid-template-columns:1fr 1fr;gap:6px"></div>
+          <div style="margin-top:12px;padding:10px 13px;background:#000;border-radius:8px;font-size:11px;color:var(--text3)">Contact your admin to request additional access.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESELLER: MY KEYS -->
+    <div class="page" id="page-r-keys">
+      <div class="ph">
+        <div class="pt">My <span class="gold">Keys</span></div>
+        <div class="pa">
+          <div class="sw"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input class="search" id="rk-search" placeholder="Search key, label…" oninput="filterResellerKeys()"/></div>
+          <select class="sel-filter" id="rk-status-filter" onchange="filterResellerKeys()" style="width:115px"><option value="">All Status</option><option value="active">Active</option><option value="frozen">Frozen</option><option value="banned">Banned</option></select>
+          <button class="btn btn-gold" onclick="go('r-generate')" id="r-gen-btn" style="display:none">+ Generate</button>
+        </div>
+      </div>
+      <div class="card" style="padding:0"><div class="tbl-wrap"><table>
+        <thead><tr><th>License Key</th><th>App</th><th>Label</th><th>Status</th><th id="r-hwid-col" style="display:none">HWID</th><th>Expires</th><th>Last Auth</th><th>Actions</th></tr></thead>
+        <tbody id="r-keys-body"><tr><td colspan="8"><div class="empty"><div class="empty-icon">🔑</div><div class="empty-text">Loading…</div></div></td></tr></tbody>
+      </table></div></div>
+    </div>
+
+    <!-- RESELLER: GENERATE KEYS -->
+    <div class="page" id="page-r-generate">
+      <div class="ph"><div class="pt">Generate <span class="gold">Keys</span></div></div>
+      <div style="display:grid;grid-template-columns:1fr 270px;gap:16px">
+        <div class="card">
+          <div class="card-title" style="margin-bottom:18px">🔑 Key Configuration</div>
+          <div class="form-grid">
+            <div class="fg"><label>App</label><div class="custom-select" id="rcs-app"><div class="cs-selected" onclick="toggleCS('rcs-app')"><span class="cs-label" id="rcs-app-label">— Select an App —</span><svg class="cs-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div><div class="cs-dropdown" id="rcs-app-menu"></div></div><input type="hidden" id="rg-app"/></div>
+            <div class="fg"><label>Quantity</label><select class="sel-filter" id="rg-count" style="width:100%"><option value="1">1 key</option><option value="5">5 keys</option><option value="10">10 keys</option><option value="25">25 keys</option><option value="50">50 keys</option><option value="100">100 keys (max)</option></select></div>
+            <div class="fg"><label>Label / Note</label><input type="text" id="rg-label" placeholder="Customer name, order #"/></div>
+            <div class="fg"><label>Product Name</label><input type="text" id="rg-product" value="Default"/></div>
+            <div class="fg"><label>Expires After (days, 0=never)</label><select class="sel-filter" id="rg-days" style="width:100%"><option value="0">Never</option><option value="1">1 day</option><option value="7">7 days</option><option value="30">30 days</option><option value="90">90 days</option><option value="365">365 days</option></select></div>
+          </div>
+          <div id="r-quota-notice" class="notice" style="display:none"></div>
+          <button class="btn btn-gold" onclick="resellerGenerateKeys()">⚡ Generate Keys</button>
+          <div class="gen-out" id="rgen-out"></div>
+          <div id="rgen-actions" style="display:none;gap:8px;margin-top:10px"><button class="btn btn-ghost btn-sm" onclick="copyRGen()">📋 Copy All</button><button class="btn btn-ghost btn-sm" onclick="dlRGen()">💾 Download</button></div>
+        </div>
+        <div class="card"><div class="card-title" style="margin-bottom:12px">📋 Quota Status</div><div id="r-gen-quota-info" style="font-size:12px;color:var(--text2);line-height:2">Loading…</div></div>
+      </div>
+    </div>
+
+    <!-- RESELLER: LOGS -->
+    <div class="page" id="page-r-logs">
+      <div class="ph"><div class="pt">Auth <span class="gold">Logs</span></div><div class="pa"><button class="btn btn-ghost btn-sm" onclick="loadResellerLogs()">↻ Refresh</button></div></div>
+      <div class="notice">Only showing logs for keys you created.</div>
+      <div class="filter-bar">
+        <div class="sw"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input class="search" id="rl-search" placeholder="Filter key…" oninput="filterResellerLogs()"/></div>
+        <select class="sel-filter" id="rl-filter" onchange="filterResellerLogs()" style="width:175px"><option value="">All Results</option><option value="SUCCESS">✅ Success</option><option value="HWID_BOUND">🔗 HWID Bound</option><option value="HWID_MISMATCH">🔒 HWID Mismatch</option><option value="INVALID_KEY">❌ Invalid Key</option><option value="BANNED">🚫 Banned</option></select>
+        <span id="rl-count" style="color:var(--text3);font-size:11px"></span>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden"><div class="tbl-wrap"><table><thead><tr><th>Timestamp</th><th>License Key</th><th id="r-log-hwid-col">HWID</th><th id="r-log-ip-col">IP</th><th>Result</th><th>Details</th></tr></thead><tbody id="r-logs-body"></tbody></table></div></div>
+    </div>
+
+    <!-- RESELLER: BLOCKS -->
+    <div class="page" id="page-r-blocks">
+      <div class="ph"><div class="pt">Blocked <span class="gold">IPs</span></div><div class="pa"><button class="btn btn-ghost btn-sm" onclick="loadResellerBlocks()">↻ Refresh</button></div></div>
+      <div class="notice">Read-only view — contact admin to unblock IPs.</div>
+      <div class="card" style="padding:0;overflow:hidden"><div class="tbl-wrap"><table><thead><tr><th>IP Address</th><th>Reason</th><th>Blocked At</th></tr></thead><tbody id="r-blocks-body"></tbody></table></div></div>
+    </div>
+
   </main>
 </div>
 
@@ -1356,16 +1545,50 @@ Body: { <span class="cs">"key"</span>:<span class="cs">"BE-XXX"</span>, <span cl
       <input class="inp" id="modal-app-desc" placeholder="What is this app?"/>
     </div>
     <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-new-app')">Cancel</button>
       <button class="btn btn-purple" onclick="createApp()">Create App</button>
     </div>
+  </div>
+</div>
+
+<!-- MODAL: CREATE RESELLER -->
+<div class="modal-bg" id="modal-new-reseller">
+  <div class="modal modal-wide">
+    <div class="modal-title">👥 Create Reseller Account</div>
+    <div class="form-grid" style="grid-template-columns:1fr 1fr">
+      <div class="fg"><label>Username *</label><input class="inp" type="text" id="nr-username" placeholder="e.g. john_reseller"/></div>
+      <div class="fg"><label>Display Name</label><input class="inp" type="text" id="nr-displayname" placeholder="e.g. John D."/></div>
+      <div class="fg"><label>Password *</label><input class="inp" type="password" id="nr-password" placeholder="Min 6 characters"/></div>
+      <div class="fg"><label>Key Quota (0 = unlimited)</label><input class="inp" type="number" id="nr-quota" value="0" min="0"/></div>
+    </div>
+    <div class="fg" style="margin-bottom:16px"><label>Notes (Discord, Telegram, etc.)</label><input class="inp" type="text" id="nr-notes" placeholder="e.g. Discord: user#1234"/></div>
+    <div style="font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:1px;color:var(--gold);text-transform:uppercase;margin-bottom:10px">🛡️ Permission Control — What can this reseller access?</div>
+    <div class="perm-grid" id="perm-grid-create"></div>
+    <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('modal-new-reseller')">Cancel</button><button class="btn btn-gold" onclick="createReseller()">Create Reseller</button></div>
+  </div>
+</div>
+
+<!-- MODAL: EDIT RESELLER -->
+<div class="modal-bg" id="modal-edit-reseller">
+  <div class="modal modal-wide">
+    <div class="modal-title">✏️ Edit Reseller</div>
+    <input type="hidden" id="edit-reseller-id"/>
+    <div class="form-grid" style="grid-template-columns:1fr 1fr">
+      <div class="fg"><label>Display Name</label><input class="inp" type="text" id="edit-displayname"/></div>
+      <div class="fg"><label>New Password (blank = no change)</label><input class="inp" type="password" id="edit-password" placeholder="Leave blank to keep current"/></div>
+      <div class="fg"><label>Key Quota (0 = unlimited)</label><input class="inp" type="number" id="edit-quota" min="0"/></div>
+      <div class="fg"><label>Notes</label><input class="inp" type="text" id="edit-notes"/></div>
+    </div>
+    <div style="font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:1px;color:var(--gold);text-transform:uppercase;margin-bottom:10px">🛡️ Permission Control</div>
+    <div class="perm-grid" id="perm-grid-edit"></div>
+    <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('modal-edit-reseller')">Cancel</button><button class="btn btn-gold" onclick="saveReseller()">Save Changes</button></div>
   </div>
 </div>
 
 <div id="toast"></div>
 
 <script>
-let TOKEN='', allKeys=[], allLogs=[], allApps=[], logTimer=null;
+let TOKEN='', RTOKEN='', RDATA=null, allKeys=[], allLogs=[], allApps=[], allResellers=[], rAllKeys=[], rAllLogs=[], logTimer=null, loginMode='admin';
 
 // LOGIN
 async function doLogin(){
@@ -1379,15 +1602,26 @@ async function doLogin(){
       TOKEN=d.token;
       document.getElementById('login-screen').style.display='none';
       document.getElementById('app').classList.add('on');
+      document.getElementById('admin-nav').style.display='';
+      document.getElementById('reseller-nav').style.display='none';
+      document.getElementById('sb-avatar').textContent='👑';
+      document.getElementById('sb-username').textContent='Admin';
+      document.getElementById('sb-userrole').textContent='BoostEmpire';
+      document.getElementById('sb-userrole').className='user-role';
       go('dashboard'); startPoll();
     } else err.textContent='Wrong password. Default: boostempire123';
   } catch{ err.textContent='Cannot reach server — is start.bat running?'; }
 }
 function logout(){
-  clearInterval(logTimer); TOKEN='';
+  clearInterval(logTimer); TOKEN=''; RTOKEN=''; RDATA=null;
   document.getElementById('login-screen').style.display='flex';
   document.getElementById('app').classList.remove('on');
   document.getElementById('lp').value='';
+  document.getElementById('lr-user').value='';
+  document.getElementById('lr-pass').value='';
+  document.getElementById('admin-nav').style.display='';
+  document.getElementById('reseller-nav').style.display='none';
+  switchLoginTab('admin');
 }
 
 // NAV
@@ -1396,11 +1630,8 @@ function go(page){
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
   document.querySelectorAll('.nav-item').forEach(n=>{if(n.dataset.page===page)n.classList.add('active');});
-  if(page==='dashboard') loadDashboard();
-  if(page==='apps') loadApps();
-  if(page==='keys') loadKeys();
-  if(page==='logs') loadLogs();
-  if(page==='blocks') loadBlocks();
+  const pageActions={dashboard:loadDashboard,apps:loadApps,keys:loadKeys,logs:loadLogs,blocks:loadBlocks,resellers:loadResellers,'r-dashboard':loadResellerDashboard,'r-keys':loadResellerKeys,'r-generate':loadResellerGeneratePage,'r-logs':loadResellerLogs,'r-blocks':loadResellerBlocks};
+  if(pageActions[page]) pageActions[page]();
 }
 
 // DASHBOARD
@@ -1409,14 +1640,9 @@ async function loadDashboard(){
   const r=await get('/api/admin/stats');
   if(!r.success)return;
   const s=r.stats;
-
-  // Animate stat values
-  anim('s-apps',s.totalApps);
-  anim('s-total',s.total);
-  anim('s-active',s.active);
-  anim('s-auths',s.recentAuths);
-  anim('s-hwid',s.hwidBlocks);
-  anim('s-blocked',s.blockedIPs);
+  anim('s-apps',s.totalApps); anim('s-total',s.total); anim('s-active',s.active);
+  anim('s-auths',s.recentAuths); anim('s-hwid',s.hwidBlocks); anim('s-blocked',s.blockedIPs);
+  anim('s-resellers',s.totalResellers||0);
 
   // Animate stat bar fills (relative to total keys as max)
   const mx = Math.max(s.total, 1);
@@ -1427,6 +1653,7 @@ async function loadDashboard(){
     setBar('sb-auths',  Math.min(s.recentAuths*5,100));
     setBar('sb-hwid',   Math.min(s.hwidBlocks*10,100));
     setBar('sb-blocked',Math.min(s.blockedIPs*20,100));
+    setBar('sb-resellers',Math.min((s.totalResellers||0)*20,100));
   },200);
 
   // Key breakdown card
@@ -1573,7 +1800,7 @@ function selectCSApp(id, name){
   closeAllCS();
 }
 function openNewAppModal(){document.getElementById('modal-new-app').classList.add('open');}
-function closeModal(){document.getElementById('modal-new-app').classList.remove('open');}
+function closeModal(id){document.getElementById(id||'modal-new-app').classList.remove('open');}
 async function createApp(){
   const name=document.getElementById('modal-app-name').value.trim();
   const description=document.getElementById('modal-app-desc').value.trim();
@@ -1655,16 +1882,14 @@ function renderKeys(keys){
     const freezeBtn = k.status==='frozen'
       ? `<button class="btn btn-ghost btn-xs" style="color:#93c5fd;border-color:rgba(59,130,246,0.3)" onclick="unfreezeKey('${k.key}')">❄ Unfreeze</button>`
       : k.status==='active' ? `<button class="btn btn-ghost btn-xs" onclick="freezeKey('${k.key}')">❄ Freeze</button>` : '';
+    const creator=k.createdBy&&k.createdBy!=='admin'?`<span class="badge b-gold" style="font-size:9px">${k.createdBy}</span>`:`<span style="font-size:10px;color:var(--text3)">admin</span>`;
     return `<tr>
       <td><span class="kc">${k.key}</span></td>
       <td style="color:var(--text2);font-size:11px">${k.appName||'—'}</td>
       <td style="color:var(--text3);font-size:11px">${k.label||'—'}</td>
       <td><span class="badge ${bc}">${st}</span></td>
-      <td>
-        <div style="font-size:11px;color:var(--text2);margin-bottom:3px">Unlimited</div>
-        <div class="prog-bar" style="width:55px"><div class="prog-fill" style="width:100%;background:#8b5cf6"></div></div>
-      </td>
       <td>${hwid}</td>
+      <td>${creator}</td>
       <td style="font-size:11px;color:var(--text2)">${k.expiresAt?k.expiresAt.substring(0,10):'<span style="color:var(--text3)">Never</span>'}</td>
       <td class="mono" style="font-size:10px">${k.lastUsed?fmtTime(k.lastUsed):'<span style="color:var(--text3)">—</span>'}</td>
       <td class="actions-cell">
@@ -1852,7 +2077,7 @@ function toggleDD(btn){
 function closeDD(){document.querySelectorAll('.dd-menu').forEach(m=>{m.classList.remove('open');m.style.top='';m.style.left='';});}
 
 // MODAL
-document.getElementById('modal-new-app').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
+document.querySelectorAll('.modal-bg').forEach(bg=>bg.addEventListener('click',e=>{if(e.target===bg)bg.classList.remove('open');}));
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeAllCS();}});
 
 // HTTP
@@ -1906,6 +2131,217 @@ function toast(msg,type='success'){
   t.innerHTML=`<span>✦</span><span>${msg}</span>`;
   t.className='show '+type;clearTimeout(tT);tT=setTimeout(()=>t.className='',3200);
 }
+// ═══════════════ LOGIN TAB SWITCH ═══════════════
+function switchLoginTab(m){
+  loginMode=m;
+  document.getElementById('lt-admin').classList.toggle('active',m==='admin');
+  document.getElementById('lt-reseller').classList.toggle('active',m==='reseller');
+  document.getElementById('login-admin-form').style.display=m==='admin'?'':'none';
+  document.getElementById('login-reseller-form').style.display=m==='reseller'?'':'none';
+  document.getElementById('lerr').textContent='';
+}
+async function doResellerLogin(){
+  const username=document.getElementById('lr-user').value.trim();
+  const password=document.getElementById('lr-pass').value;
+  const err=document.getElementById('lerr'); err.textContent='';
+  if(!username||!password){err.textContent='Enter username and password.';return;}
+  try{
+    const d=await fetch('/api/reseller/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,password})}).then(r=>r.json());
+    if(d.success){
+      RTOKEN=d.token; RDATA=d.reseller;
+      document.getElementById('login-screen').style.display='none';
+      document.getElementById('app').classList.add('on');
+      document.getElementById('admin-nav').style.display='none';
+      document.getElementById('reseller-nav').style.display='';
+      document.getElementById('sb-avatar').textContent='🔑';
+      document.getElementById('sb-username').textContent=RDATA.displayName;
+      document.getElementById('sb-userrole').textContent='Reseller';
+      document.getElementById('sb-userrole').className='user-role gold';
+      buildResellerNav(); go('r-dashboard');
+    } else err.textContent=d.message||'Invalid credentials.';
+  } catch{err.textContent='Cannot reach server.';}
+}
+function buildResellerNav(){
+  const p=RDATA.permissions;
+  const hasKeys=p.viewKeys||p.generateKeys; const hasMon=p.viewLogs||p.viewBlocks;
+  document.getElementById('r-nav-keys-sec').style.display=hasKeys?'':'none';
+  document.getElementById('r-nav-keys').style.display=p.viewKeys?'':'none';
+  document.getElementById('r-nav-generate').style.display=p.generateKeys?'':'none';
+  document.getElementById('r-nav-mon-sec').style.display=hasMon?'':'none';
+  document.getElementById('r-nav-logs').style.display=p.viewLogs?'':'none';
+  document.getElementById('r-nav-blocks').style.display=p.viewBlocks?'':'none';
+  const gb=document.getElementById('r-gen-btn'); if(gb) gb.style.display=p.generateKeys?'':'none';
+  const hc=document.getElementById('r-hwid-col'); if(hc) hc.style.display=p.viewHWID?'':'none';
+  const lh=document.getElementById('r-log-hwid-col'); if(lh) lh.style.display=p.viewHWID?'':'none';
+  const li=document.getElementById('r-log-ip-col'); if(li) li.style.display=p.viewIP?'':'none';
+}
+
+// ═══════════════ PERMISSIONS ═══════════════
+const PERMS=[
+  {key:'viewKeys',label:'View Keys',desc:'See list of keys'},
+  {key:'viewHWID',label:'View HWID',desc:'See hardware IDs'},
+  {key:'viewIP',label:'View IP Addresses',desc:'See IPs in logs'},
+  {key:'viewLogs',label:'View Auth Logs',desc:'Access log feed'},
+  {key:'viewBlocks',label:'View Blocked IPs',desc:'See IP blocklist'},
+  {key:'generateKeys',label:'Generate Keys',desc:'Create new keys'},
+  {key:'banKeys',label:'Ban / Unban Keys',desc:'Toggle key bans'},
+  {key:'freezeKeys',label:'Freeze / Unfreeze',desc:'Freeze keys'},
+  {key:'resetHWID',label:'Reset HWID',desc:'Reset HWID lock'},
+  {key:'deleteKeys',label:'Delete Keys',desc:'Remove keys'},
+  {key:'viewStats',label:'View Stats',desc:'Dashboard stats'},
+];
+function renderPermGrid(cid,ex={}){
+  document.getElementById(cid).innerHTML=PERMS.map(p=>`<div class="perm-item ${ex[p.key]?'on':''}" id="pi-${cid}-${p.key}"><div class="perm-label">${p.label}<small>${p.desc}</small></div><div class="toggle ${ex[p.key]?'on':''}" id="pt-${cid}-${p.key}" onclick="togglePerm('${cid}','${p.key}')"></div></div>`).join('');
+}
+function togglePerm(cid,key){const t=document.getElementById(`pt-${cid}-${key}`);const i=document.getElementById(`pi-${cid}-${key}`);const on=t.classList.toggle('on');i.classList.toggle('on',on);}
+function getPerms(cid){const p={};PERMS.forEach(pp=>{p[pp.key]=document.getElementById(`pt-${cid}-${pp.key}`).classList.contains('on');});return p;}
+
+// ═══════════════ ADMIN: RESELLERS ═══════════════
+async function loadResellers(){
+  const r=await get('/api/admin/resellers'); if(!r.success)return; allResellers=r.resellers;
+  const badge=document.getElementById('reseller-badge');
+  badge.textContent=r.resellers.length; badge.style.display=r.resellers.length?'inline':'none';
+  const el=document.getElementById('resellers-list');
+  if(!r.resellers.length){el.innerHTML='<div class="empty"><div class="empty-icon">👥</div><div class="empty-text">No resellers yet</div></div>';return;}
+  el.innerHTML=r.resellers.map(rs=>{
+    const q=rs.keyQuota>0?rs.keysGenerated+'/'+rs.keyQuota:rs.keysGenerated+' (unlimited)';
+    const qpct=rs.keyQuota>0?Math.min(Math.round(rs.keysGenerated/rs.keyQuota*100),100):0;
+    return `<div class="reseller-card ${rs.active?'gld':''}">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:40px;height:40px;background:var(--golddim);border:1px solid rgba(245,158,11,0.25);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px">🔑</div>
+          <div>
+            <div style="font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;color:${rs.active?'var(--gold)':'var(--text3)'}">
+              ${rs.displayName} <span style="font-size:11px;color:var(--text3);font-family:'Inter',sans-serif">@${rs.username}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
+              <span class="badge ${rs.active?'b-gold':'b-suspended'}">${rs.active?'Active':'Suspended'}</span>
+              <span style="font-size:10px;color:var(--text3)">Keys: ${q}</span>
+              ${rs.notes?`<span style="font-size:10px;color:var(--text3)">· ${rs.notes}</span>`:''}
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn btn-ghost btn-sm" onclick="openEditResellerModal('${rs._id}')">✏️ Edit</button>
+          <button class="btn btn-${rs.active?'danger':'ghost'} btn-sm" onclick="toggleReseller('${rs._id}')">${rs.active?'Suspend':'Activate'}</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteReseller('${rs._id}')">🗑</button>
+        </div>
+      </div>
+      ${rs.keyQuota>0?`<div style="margin-top:12px"><div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-bottom:4px"><span>Quota Usage</span><span>${rs.keysGenerated}/${rs.keyQuota}</span></div><div class="quota-bar"><div class="quota-fill" style="width:${qpct}%"></div></div></div>`:''}
+      <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:4px">
+        ${PERMS.map(p=>`<span class="perm-badge ${rs.permissions&&rs.permissions[p.key]?'yes':'no'}">${rs.permissions&&rs.permissions[p.key]?'✓':'-'} ${p.label}</span>`).join('')}
+      </div>
+      <div style="margin-top:8px;font-size:10px;color:var(--text3)">Created: ${rs.createdAt?rs.createdAt.substring(0,10):'—'} · Last login: ${rs.lastLogin?fmtTime(rs.lastLogin):'Never'}</div>
+    </div>`;
+  }).join('');
+}
+function openNewResellerModal(){renderPermGrid('perm-grid-create',{});['nr-username','nr-displayname','nr-password','nr-notes'].forEach(id=>document.getElementById(id).value='');document.getElementById('nr-quota').value='0';document.getElementById('modal-new-reseller').classList.add('open');}
+async function createReseller(){
+  const username=document.getElementById('nr-username').value.trim();
+  const password=document.getElementById('nr-password').value;
+  if(!username||!password){toast('Username and password required','error');return;}
+  if(password.length<6){toast('Password min 6 chars','error');return;}
+  const r=await post('/api/admin/resellers',{username,displayName:document.getElementById('nr-displayname').value.trim()||username,password,keyQuota:parseInt(document.getElementById('nr-quota').value)||0,notes:document.getElementById('nr-notes').value.trim(),permissions:getPerms('perm-grid-create')});
+  if(r.success){closeModal('modal-new-reseller');toast('Reseller created!','success');loadResellers();}
+  else toast(r.message||'Error','error');
+}
+function openEditResellerModal(id){
+  const rs=allResellers.find(r=>r._id===id); if(!rs)return;
+  document.getElementById('edit-reseller-id').value=id;
+  document.getElementById('edit-displayname').value=rs.displayName||'';
+  document.getElementById('edit-password').value='';
+  document.getElementById('edit-quota').value=rs.keyQuota||0;
+  document.getElementById('edit-notes').value=rs.notes||'';
+  renderPermGrid('perm-grid-edit',rs.permissions||{});
+  document.getElementById('modal-edit-reseller').classList.add('open');
+}
+async function saveReseller(){
+  const id=document.getElementById('edit-reseller-id').value;
+  const body={displayName:document.getElementById('edit-displayname').value.trim(),keyQuota:parseInt(document.getElementById('edit-quota').value)||0,notes:document.getElementById('edit-notes').value.trim(),permissions:getPerms('perm-grid-edit')};
+  const pw=document.getElementById('edit-password').value; if(pw) body.password=pw;
+  const r=await fetch('/api/admin/resellers/'+id,{method:'PATCH',headers:{'Content-Type':'application/json','x-admin-token':TOKEN},body:JSON.stringify(body)}).then(r=>r.json());
+  if(r.success){closeModal('modal-edit-reseller');toast('Updated!','success');loadResellers();}
+  else toast(r.message||'Error','error');
+}
+async function toggleReseller(id){const r=await post('/api/admin/resellers/'+id+'/toggle');if(r.success){toast(r.active?'Activated':'Suspended','info');loadResellers();}}
+async function deleteReseller(id){if(!confirm('Delete reseller?'))return;await del('/api/admin/resellers/'+id);toast('Deleted','error');loadResellers();}
+
+// ═══════════════ RESELLER DASHBOARD ═══════════════
+async function loadResellerDashboard(){
+  document.getElementById('r-display-name').textContent=RDATA.displayName+' — Dashboard';
+  const pd=document.getElementById('r-permissions-display');
+  pd.innerHTML=PERMS.map(p=>`<div style="display:flex;align-items:center;gap:6px;padding:6px 9px;background:var(--bg3);border:1px solid var(--border);border-radius:7px"><div style="width:6px;height:6px;border-radius:50%;background:${RDATA.permissions[p.key]?'var(--p)':'var(--text3)'};flex-shrink:0"></div><span style="font-size:11px;color:${RDATA.permissions[p.key]?'var(--text2)':'var(--text3)'}">${p.label}</span></div>`).join('');
+  const r=await rget('/api/reseller/stats');
+  if(r.success){
+    const s=r.stats; anim('rs-total',s.totalKeys); anim('rs-active',s.activeKeys); anim('rs-banned',s.bannedKeys);
+    if(s.keyQuota>0){document.getElementById('rs-quota').textContent=s.slotsLeft;document.getElementById('rs-quota-label').textContent=s.keysGenerated+'/'+s.keyQuota+' used';document.getElementById('rs-quota-fill').style.width=Math.min(Math.round(s.keysGenerated/s.keyQuota*100),100)+'%';}
+    else{document.getElementById('rs-quota').textContent='∞';document.getElementById('rs-quota-label').textContent='Unlimited';}
+    const ab=document.getElementById('rs-active-bar'); if(ab&&s.totalKeys>0) ab.style.width=Math.round(s.activeKeys/s.totalKeys*100)+'%';
+  }
+  const vlb=document.getElementById('r-view-logs-btn'); if(vlb) vlb.style.display=RDATA.permissions.viewLogs?'':'none';
+  const act=document.getElementById('r-dash-activity');
+  if(RDATA.permissions.viewLogs){const lr=await rget('/api/reseller/logs');if(lr.success&&lr.logs.length){act.innerHTML=lr.logs.slice(0,8).map(l=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 18px;border-bottom:1px solid rgba(139,92,246,0.04);font-size:11px"><span style="color:var(--text3);font-family:'JetBrains Mono',monospace;font-size:10px;min-width:65px">${fmtTimeShort(l.timestamp)}</span>${rb(l.result)}<span style="color:var(--text3);font-family:'JetBrains Mono',monospace;font-size:10px;margin-left:auto">${RDATA.permissions.viewIP?(l.ip||'—'):'—'}</span></div>`).join('');} else act.innerHTML='<div style="text-align:center;padding:24px;color:var(--text3);font-size:12px">No activity yet</div>';}
+  else act.innerHTML='<div style="text-align:center;padding:24px;color:var(--text3);font-size:12px">Log access not enabled</div>';
+}
+
+// ═══════════════ RESELLER KEYS ═══════════════
+async function loadResellerKeys(){
+  if(!RDATA.permissions.viewKeys){document.getElementById('r-keys-body').innerHTML='<tr><td colspan="8"><div class="empty"><div class="empty-icon">🔒</div><div class="empty-text">You don\'t have permission to view keys</div></div></td></tr>';return;}
+  const r=await rget('/api/reseller/keys'); if(r.success){rAllKeys=r.keys;filterResellerKeys();}
+}
+function filterResellerKeys(){const q=document.getElementById('rk-search').value.toLowerCase();const sf=document.getElementById('rk-status-filter').value;let keys=rAllKeys;if(q)keys=keys.filter(k=>k.key.toLowerCase().includes(q)||(k.label||'').toLowerCase().includes(q));if(sf)keys=keys.filter(k=>k.status===sf);renderResellerKeys(keys);}
+function renderResellerKeys(keys){
+  const tb=document.getElementById('r-keys-body'); const showHwid=RDATA.permissions.viewHWID;
+  if(!keys.length){tb.innerHTML='<tr><td colspan="8"><div class="empty"><div class="empty-icon">🔑</div><div class="empty-text">No keys yet</div></div></td></tr>';return;}
+  const perm=RDATA.permissions;
+  tb.innerHTML=keys.map(k=>{
+    const exp=k.expiresAt&&new Date(k.expiresAt)<new Date(); const st=exp?'expired':k.status;
+    const bc=st==='active'?'b-active':st==='frozen'?'b-frozen':st==='banned'?'b-banned':'b-expired';
+    const hwid=showHwid?(k.hwid?`<td><div style="display:flex;align-items:center;gap:5px"><div style="width:6px;height:6px;border-radius:50%;background:var(--p);box-shadow:0 0 5px var(--p);flex-shrink:0"></div><span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3)">${k.hwidRaw||'Bound'}</span></div></td>`:'<td><span style="color:var(--text3);font-size:11px">Unbound</span></td>'):'';
+    const banBtn=perm.banKeys?(k.status==='banned'?`<button class="btn btn-ghost btn-xs" onclick="rToggleKey('${k.key}')">Unban</button>`:k.status!=='frozen'?`<button class="btn btn-danger btn-xs" onclick="rToggleKey('${k.key}')">Ban</button>`:''):'';
+    const frzBtn=perm.freezeKeys?(k.status==='frozen'?`<button class="btn btn-ghost btn-xs" style="color:#93c5fd" onclick="rUnfreezeKey('${k.key}')">❄ Unfreeze</button>`:k.status==='active'?`<button class="btn btn-ghost btn-xs" onclick="rFreezeKey('${k.key}')">❄ Freeze</button>`:''):'';
+    const ddItems=[perm.resetHWID?`<div class="dd-item" onclick="rResetHWID('${k.key}');closeDD()">↺ Reset HWID</div>`:'',`<div class="dd-item" onclick="copyText('${k.key}');closeDD()">📋 Copy Key</div>`,perm.deleteKeys?`<div class="dd-sep"></div><div class="dd-item danger" onclick="rDelKey('${k.key}');closeDD()">🗑 Delete</div>`:''].filter(Boolean).join('');
+    return `<tr><td><span class="kc">${k.key}</span></td><td style="color:var(--text2);font-size:11px">${k.appName||'—'}</td><td style="color:var(--text3);font-size:11px">${k.label||'—'}</td><td><span class="badge ${bc}">${st}</span></td>${hwid}<td style="font-size:11px;color:var(--text2)">${k.expiresAt?k.expiresAt.substring(0,10):'<span style="color:var(--text3)">Never</span>'}</td><td style="font-family:'JetBrains Mono',monospace;font-size:10px">${k.lastUsed?fmtTime(k.lastUsed):'<span style="color:var(--text3)">—</span>'}</td><td style="display:flex;align-items:center;gap:4px">${frzBtn}${banBtn}${ddItems?`<div class="dropdown"><button class="btn btn-ghost btn-xs" onclick="toggleDD(this)">⋯</button><div class="dd-menu">${ddItems}</div></div>`:''}</td></tr>`;
+  }).join('');
+}
+async function rToggleKey(key){const r=await rpost('/api/reseller/keys/'+encodeURIComponent(key)+'/toggle');if(r.success){toast(r.status==='banned'?'Key banned':'Key unbanned','info');loadResellerKeys();}else toast(r.message,'error');}
+async function rFreezeKey(key){const r=await rpost('/api/reseller/keys/'+encodeURIComponent(key)+'/freeze');if(r.success){toast('Key frozen','info');loadResellerKeys();}else toast(r.message,'error');}
+async function rUnfreezeKey(key){const r=await rpost('/api/reseller/keys/'+encodeURIComponent(key)+'/unfreeze');if(r.success){toast('Key unfrozen','success');loadResellerKeys();}else toast(r.message,'error');}
+async function rResetHWID(key){if(!confirm('Reset HWID?'))return;await rpost('/api/reseller/keys/'+encodeURIComponent(key)+'/reset-hwid');toast('HWID reset','info');loadResellerKeys();}
+async function rDelKey(key){if(!confirm('Delete key?'))return;await rdel('/api/reseller/keys/'+encodeURIComponent(key));toast('Deleted','error');loadResellerKeys();}
+
+// ═══════════════ RESELLER GENERATE ═══════════════
+async function loadResellerGeneratePage(){
+  const ar=await rget('/api/reseller/apps');
+  if(ar.success){const m=document.getElementById('rcs-app-menu');m.innerHTML=ar.apps.map(a=>`<div class="cs-opt" data-val="${a._id}" onclick="selRCSApp('${a._id}','${a.name}')"><span class="cs-opt-icon">📱</span><div class="cs-opt-main"><span class="cs-opt-label">${a.name}</span></div></div>`).join('');}
+  const sr=await rget('/api/reseller/stats'); const qi=document.getElementById('r-gen-quota-info'); const qn=document.getElementById('r-quota-notice');
+  if(sr.success){const s=sr.stats;if(s.keyQuota>0){const pct=Math.min(Math.round(s.keysGenerated/s.keyQuota*100),100);qi.innerHTML=`Keys generated: <b style="color:var(--text)">${s.keysGenerated}</b><br/>Quota: <b style="color:var(--text)">${s.keyQuota}</b><br/>Remaining: <b style="color:${s.slotsLeft<=5?'#f59e0b':'var(--p3)'}">${s.slotsLeft}</b><br/><div class="quota-bar" style="margin-top:8px"><div class="quota-fill" style="width:${pct}%"></div></div>`;if(qn){qn.style.display=s.slotsLeft<=0?'':'none';qn.textContent='Quota exhausted. Contact admin.';}}else{qi.innerHTML=`Generated: <b style="color:var(--text)">${s.keysGenerated}</b><br/>Quota: <b style="color:var(--p3)">Unlimited ♾</b>`;if(qn) qn.style.display='none';}}
+}
+function selRCSApp(id,name){document.getElementById('rg-app').value=id;document.getElementById('rcs-app-label').textContent=name;document.querySelectorAll('#rcs-app-menu .cs-opt').forEach(o=>o.classList.toggle('selected',o.dataset.val===id));closeAllCS();}
+async function resellerGenerateKeys(){
+  const appId=document.getElementById('rg-app').value; if(!appId){toast('Select an app first','error');return;}
+  const r=await rpost('/api/reseller/generate',{appId,count:parseInt(document.getElementById('rg-count').value)||1,label:document.getElementById('rg-label').value,product:document.getElementById('rg-product').value||'Default',max_uses:1,expires_days:parseInt(document.getElementById('rg-days').value)||null});
+  if(r.success){const out=document.getElementById('rgen-out');out.style.display='block';out.textContent=r.keys.join('\n');document.getElementById('rgen-actions').style.display='flex';toast('Generated '+r.keys.length+' key(s)!','success');loadResellerGeneratePage();}
+  else toast(r.message,'error');
+}
+function copyRGen(){navigator.clipboard.writeText(document.getElementById('rgen-out').textContent);toast('Copied!','success');}
+function dlRGen(){const a=document.createElement('a');a.href='data:text/plain,'+encodeURIComponent(document.getElementById('rgen-out').textContent);a.download='reseller-keys.txt';a.click();}
+
+// ═══════════════ RESELLER LOGS ═══════════════
+async function loadResellerLogs(){
+  if(!RDATA.permissions.viewLogs){document.getElementById('r-logs-body').innerHTML='<tr><td colspan="6"><div class="empty"><div class="empty-icon">🔒</div><div class="empty-text">Log access not enabled</div></div></td></tr>';return;}
+  const r=await rget('/api/reseller/logs'); if(r.success){rAllLogs=r.logs;document.getElementById('rl-count').textContent=r.logs.length+' entries';filterResellerLogs();}
+}
+function filterResellerLogs(){const q=document.getElementById('rl-search').value.toLowerCase();const rf=document.getElementById('rl-filter').value;let logs=rAllLogs;if(rf)logs=logs.filter(l=>l.result===rf);if(q)logs=logs.filter(l=>(l.key||'').toLowerCase().includes(q));const tb=document.getElementById('r-logs-body');const sh=RDATA.permissions.viewHWID;const si=RDATA.permissions.viewIP;if(!logs.length){tb.innerHTML='<tr><td colspan="6"><div class="empty"><div class="empty-icon">🔍</div><div class="empty-text">No logs</div></div></td></tr>';return;}tb.innerHTML=logs.map(l=>`<tr><td style="font-family:'JetBrains Mono',monospace;font-size:10px;white-space:nowrap">${fmtTime(l.timestamp)}</td><td><span class="kc" style="font-size:10px">${(l.key||'—').substring(0,18)}…</span></td>${sh?`<td style="font-family:'JetBrains Mono',monospace;font-size:10px">${l.hwid||'—'}</td>`:'<td style="color:var(--text3)">—</td>'}${si?`<td style="font-family:'JetBrains Mono',monospace;font-size:10px">${l.ip||'—'}</td>`:'<td style="color:var(--text3)">—</td>'}<td>${rb(l.result)}</td><td style="color:var(--text3);font-size:11px">${l.details||'—'}</td></tr>`).join('');}
+
+// ═══════════════ RESELLER BLOCKS ═══════════════
+async function loadResellerBlocks(){if(!RDATA.permissions.viewBlocks){document.getElementById('r-blocks-body').innerHTML='<tr><td colspan="3"><div class="empty"><div class="empty-icon">🔒</div><div class="empty-text">Block access not enabled</div></div></td></tr>';return;}const r=await rget('/api/reseller/blocks');if(!r.success)return;const tb=document.getElementById('r-blocks-body');if(!r.blocks.length){tb.innerHTML='<tr><td colspan="3"><div class="empty"><div class="empty-icon">✅</div><div class="empty-text">No blocked IPs</div></div></td></tr>';return;}tb.innerHTML=r.blocks.map(b=>`<tr><td><span class="kc">${b.ip}</span></td><td style="color:var(--text2);font-size:11px">${b.reason||'—'}</td><td style="font-family:'JetBrains Mono',monospace;font-size:10px">${b.blockedAt?b.blockedAt.substring(0,19).replace('T',' '):'—'}</td></tr>`).join('');}
+
+// ═══════════════ RESELLER HTTP HELPERS ═══════════════
+async function rget(url){const r=await fetch(url,{headers:{'x-reseller-token':RTOKEN}});return r.json();}
+async function rpost(url,body={}){const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','x-reseller-token':RTOKEN},body:JSON.stringify(body)});return r.json();}
+async function rdel(url){const r=await fetch(url,{method:'DELETE',headers:{'x-reseller-token':RTOKEN}});return r.json();}
+
 </script>
 </body>
 </html>
