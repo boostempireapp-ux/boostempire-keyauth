@@ -170,7 +170,15 @@ async function resolveRealIP(req) {
 }
 
 // ── PUBLIC AUTH ───────────────────────────────────────────────────────────────
+// Protection 4: Timing jitter — random 80-350ms delay on auth
+// Makes automated key-testing scripts hit rate limits faster
+// and prevents timing attacks on the auth logic
+function authJitter() {
+  return new Promise(r => setTimeout(r, 80 + Math.floor(Math.random() * 270)));
+}
+
 app.post('/api/auth', rateLimit, async (req, res) => {
+  await authJitter();
   const { key, hwid, app_name } = req.body;
   const publicKey = req.headers['x-public-key'] || req.body.public_key;
   const ip = await resolveRealIP(req);
@@ -222,6 +230,23 @@ app.post('/api/auth', rateLimit, async (req, res) => {
         log(appDoc._id, key, hwid, app_name||appDoc.name, 'AUTH', 'EXPIRED', ip, `Expired: ${doc.expiresAt}`);
         return res.json({ success:false, code:'EXPIRED', message:'License key has expired' });
       }
+      // Protection 10: Multi-machine detection
+      // If the same key authenticates from a different CPU brand within 60s, ban it
+      const cpu = req.body.cpu || '';
+      if (cpu && doc.lastCpu && doc.lastCpu !== cpu) {
+        const lastAuthTime = doc.lastUsed ? new Date(doc.lastUsed).getTime() : 0;
+        const now = Date.now();
+        if (now - lastAuthTime < 60000) {
+          // Same key, different CPU, within 60s = key sharing / cracker
+          keysDb.update({ key }, { $set: { status: 'banned' } }, {});
+          activeSessions.delete(key);
+          log(appDoc._id, key, hwid, app_name||appDoc.name, 'AUTH', 'BANNED', ip, 'Multi-machine detected — key banned');
+          return res.json({ success:false, code:'BANNED', message:'License key banned for multi-machine use' });
+        }
+      }
+      // Store CPU fingerprint for next check
+      if (cpu) keysDb.update({ key }, { $set: { lastCpu: cpu } }, {});
+
       // MAX_USES enforcement removed — keys only lock on HWID mismatch
 
       // Hash the HWID before storing (privacy + anti-enum)
