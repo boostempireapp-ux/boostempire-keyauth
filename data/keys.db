@@ -1,0 +1,3 @@
+{"key":"BE-729B5E30809C43BEA270","appId":"2UhLunwWF0Zszrxz","appName":"pc op","label":"","product":"Default","status":"active","hwid":"f1aab8ffb188bc3a506818f1e6a52a2611693df1fc2d3884a219f547c3a74d90","hwidRaw":"BE-HW-D4AAD122EAAAEA683C9FD469","max_uses":2,"uses":1,"expiresAt":null,"createdAt":"2026-08-17T00:33:27.927Z","lastUsed":"2026-08-17T02:12:57.576Z","_id":"GPlo95DAncFQzBWl"}
+{"$$indexCreated":{"fieldName":"key","unique":true,"sparse":false}}
+{"$$indexCreated":{"fieldName":"key","unique":true}}

@@ -1,0 +1,3 @@
+{"name":"pc op","description":"pc win11","publicKey":"pk_edf241e18107406ebf19effb369c129c","secretKey":"sk_e8c65e292c4b41a19bf5cca87195d494d114e87fe0264d94a40241a0a92cf3b8","active":true,"createdAt":"2026-08-16T22:06:15.081Z","_id":"2UhLunwWF0Zszrxz"}
+{"$$indexCreated":{"fieldName":"publicKey","unique":true,"sparse":false}}
+{"$$indexCreated":{"fieldName":"publicKey","unique":true}}

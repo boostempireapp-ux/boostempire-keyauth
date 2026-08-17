@@ -1,0 +1,1860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>BoostEmpire KeyAuth</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+:root{
+  --bg:#000;--bg2:#080808;--bg3:#0f0f0f;--bg4:#141414;
+  --border:rgba(139,92,246,0.1);--border2:rgba(139,92,246,0.22);
+  --glass:rgba(139,92,246,0.04);--glassh:rgba(139,92,246,0.09);
+  --p:#8b5cf6;--p2:#6d28d9;--p3:#a78bfa;--p4:#c4b5fd;--p5:#7c3aed;
+  --pdim:rgba(139,92,246,0.12);--p2dim:rgba(109,40,217,0.12);
+  --text:#e8e8ff;--text2:#9090c0;--text3:#4a4a7a;
+  --r:10px;--r2:14px;--sb:225px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:13px}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 50% 35% at 20% 0%,rgba(139,92,246,0.07) 0%,transparent 60%),
+             radial-gradient(ellipse 40% 30% at 80% 100%,rgba(109,40,217,0.05) 0%,transparent 60%);}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(139,92,246,0.3);border-radius:2px}
+::-webkit-scrollbar-thumb:hover{background:var(--p)}
+
+/* LOGIN */
+#login-screen{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse 80% 70% at 50% 0%,rgba(139,92,246,0.18) 0%,transparent 65%);}
+.login-box{background:rgba(8,8,8,0.97);border:1px solid var(--border2);border-radius:20px;
+  padding:48px 44px;width:400px;text-align:center;
+  box-shadow:0 0 0 1px rgba(139,92,246,0.12),0 40px 80px rgba(0,0,0,0.9),0 0 60px rgba(139,92,246,0.06);}
+.login-logo-img{width:72px;height:72px;object-fit:cover;border-radius:16px;margin:0 auto 16px;display:block;
+  box-shadow:0 8px 32px rgba(139,92,246,0.4);}
+.brand-big{font-family:'Rajdhani',sans-serif;font-size:34px;font-weight:700;letter-spacing:4px;
+  background:linear-gradient(135deg,#c4b5fd 0%,#8b5cf6 50%,#6d28d9 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;display:block;line-height:1;}
+.brand-sub{font-size:10px;letter-spacing:5px;color:var(--text3);text-transform:uppercase;display:block;margin:4px 0 28px;}
+.inp{width:100%;padding:12px 15px;background:rgba(139,92,246,0.05);
+  border:1px solid var(--border2);border-radius:var(--r);
+  color:var(--text);font-family:'Inter',sans-serif;font-size:13px;
+  outline:none;transition:all .2s;margin-bottom:12px;}
+.inp:focus{border-color:var(--p);background:rgba(139,92,246,0.08);box-shadow:0 0 0 3px rgba(139,92,246,0.12);}
+.lerr{color:#9333ea;font-size:12px;margin-top:10px;min-height:18px}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  padding:9px 18px;border-radius:var(--r);font-family:'Inter',sans-serif;
+  font-size:12px;font-weight:600;cursor:pointer;border:none;transition:all .15s;white-space:nowrap;}
+.btn-primary{background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;width:100%;
+  padding:13px;font-size:14px;box-shadow:0 4px 20px rgba(139,92,246,0.28);}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 8px 28px rgba(139,92,246,0.45);}
+.btn-purple{background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;
+  box-shadow:0 4px 14px rgba(139,92,246,0.25);}
+.btn-purple:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(139,92,246,0.4);}
+.btn-ghost{background:var(--glass);color:var(--text2);border:1px solid var(--border2);}
+.btn-ghost:hover{background:var(--glassh);color:var(--text);border-color:var(--p);}
+.btn-danger{background:var(--p2dim);color:#9333ea;border:1px solid rgba(109,40,217,0.25);}
+.btn-danger:hover{background:rgba(109,40,217,0.2);}
+.btn-sm{padding:6px 12px;font-size:11px;}
+.btn-xs{padding:4px 9px;font-size:11px;border-radius:6px;}
+
+/* LAYOUT */
+#app{display:none;height:100vh;position:relative;z-index:1;}
+#app.on{display:flex;}
+.sidebar{width:var(--sb);min-width:var(--sb);height:100vh;background:rgba(4,4,4,0.99);
+  border-right:1px solid var(--border);display:flex;flex-direction:column;position:relative;z-index:10;}
+.sidebar::after{content:'';position:absolute;top:0;right:-1px;bottom:0;width:1px;
+  background:linear-gradient(180deg,transparent 0%,var(--p) 50%,transparent 100%);opacity:0.22;}
+.sb-top{padding:16px 16px 16px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:12px;}
+.sb-logo{width:38px;height:38px;border-radius:10px;object-fit:cover;flex-shrink:0;
+  box-shadow:0 4px 16px rgba(139,92,246,0.35);}
+.sb-brand-wrap{display:flex;flex-direction:column;}
+.s-brand{font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;letter-spacing:1.5px;
+  background:linear-gradient(90deg,#a78bfa,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.s-sub{font-size:8px;letter-spacing:2.5px;color:var(--text3);text-transform:uppercase;}
+.s-status{display:flex;align-items:center;gap:5px;margin-top:4px;font-size:9px;color:var(--p3);}
+.s-status::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--p);
+  box-shadow:0 0 5px var(--p);animation:blink 2s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.nav{flex:1;overflow-y:auto;padding:8px 0;}
+.nav-sec{padding:14px 16px 5px;font-size:9px;font-weight:700;letter-spacing:2px;color:var(--text3);text-transform:uppercase;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 16px;
+  color:var(--text3);cursor:pointer;font-size:12px;font-weight:500;
+  transition:all .12s;border-left:2px solid transparent;}
+.nav-item:hover{color:var(--text);background:var(--glass);}
+.nav-item.active{color:var(--p3);border-left-color:var(--p);
+  background:linear-gradient(90deg,rgba(139,92,246,0.1) 0%,transparent 100%);}
+.nav-item svg{width:14px;height:14px;flex-shrink:0;}
+.nav-badge{margin-left:auto;background:var(--p2);color:#fff;padding:1px 6px;border-radius:8px;font-size:9px;font-weight:700;display:none;}
+.sb-foot{padding:12px 16px;border-top:1px solid var(--border);}
+.user-row{display:flex;align-items:center;gap:10px;padding:9px 12px;
+  background:var(--glass);border-radius:var(--r);border:1px solid var(--border);margin-bottom:10px;}
+.user-av{width:28px;height:28px;border-radius:8px;overflow:hidden;flex-shrink:0;}
+.user-av img{width:100%;height:100%;object-fit:cover;}
+.user-name{font-size:11px;font-weight:600;color:var(--text);}
+.user-role{font-size:9px;color:var(--p3);}
+
+/* MAIN */
+.main{flex:1;overflow-y:auto;height:100vh;padding:26px 30px;}
+.page{display:none;animation:fi .2s ease;}
+.page.active{display:block;}
+@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.ph{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px;}
+.pt{font-family:'Rajdhani',sans-serif;font-size:25px;font-weight:700;}
+.pt span{color:var(--p3);}
+.pa{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:12px;margin-bottom:22px;}
+.stat{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);
+  padding:18px 16px;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s;}
+.stat:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(139,92,246,0.09);}
+.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.stat::after{content:'';position:absolute;bottom:-18px;right:-18px;width:65px;height:65px;border-radius:50%;opacity:0.06;}
+.sa::before{background:linear-gradient(90deg,#a78bfa,transparent)}.sa::after{background:#a78bfa}
+.sb2::before{background:linear-gradient(90deg,#8b5cf6,transparent)}.sb2::after{background:#8b5cf6}
+.sc::before{background:linear-gradient(90deg,#9333ea,transparent)}.sc::after{background:#9333ea}
+.sd::before{background:linear-gradient(90deg,#7c3aed,transparent)}.sd::after{background:#7c3aed}
+.se::before{background:linear-gradient(90deg,#6d28d9,transparent)}.se::after{background:#6d28d9}
+.sf::before{background:linear-gradient(90deg,#c4b5fd,transparent)}.sf::after{background:#c4b5fd}
+.stat-val{font-family:'Rajdhani',sans-serif;font-size:34px;font-weight:700;line-height:1;margin-bottom:4px;}
+.sa .stat-val{color:#a78bfa}.sb2 .stat-val{color:#8b5cf6}.sc .stat-val{color:#9333ea}
+.sd .stat-val{color:#7c3aed}.se .stat-val{color:#6d28d9}.sf .stat-val{color:#c4b5fd}
+.stat-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-weight:600;}
+.stat-icon{position:absolute;top:12px;right:12px;font-size:16px;opacity:0.3;}
+
+/* CARD */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:20px;margin-bottom:16px;}
+.card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.card-title{font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;
+  color:var(--p3);text-transform:uppercase;display:flex;align-items:center;gap:7px;}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+thead th{padding:9px 13px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;
+  color:var(--text3);background:var(--bg3);border-bottom:1px solid var(--border);text-align:left;white-space:nowrap;}
+tbody tr{border-bottom:1px solid rgba(139,92,246,0.04);transition:background .1s;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:rgba(139,92,246,0.04);}
+tbody td{padding:9px 13px;vertical-align:middle;}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;
+  font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;}
+.badge::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.b-active{background:rgba(139,92,246,0.1);color:#a78bfa;border:1px solid rgba(139,92,246,0.25);}
+.b-active::before{background:#8b5cf6;box-shadow:0 0 4px #8b5cf6;}
+.b-banned{background:rgba(109,40,217,0.12);color:#9333ea;border:1px solid rgba(109,40,217,0.25);}
+.b-banned::before{background:#9333ea;}
+.b-expired{background:rgba(74,74,122,0.12);color:var(--text3);border:1px solid rgba(74,74,122,0.2);}
+.b-expired::before{background:var(--text3);}
+.b-ok{background:rgba(139,92,246,0.1);color:#a78bfa;border:1px solid rgba(139,92,246,0.25);}
+.b-ok::before{background:#8b5cf6;box-shadow:0 0 4px #8b5cf6;animation:blink 2s infinite;}
+.b-fail{background:rgba(109,40,217,0.12);color:#9333ea;border:1px solid rgba(109,40,217,0.25);}
+.b-fail::before{background:#9333ea;}
+.b-warn{background:rgba(124,58,237,0.12);color:#7c3aed;border:1px solid rgba(124,58,237,0.25);}
+.b-warn::before{background:#7c3aed;}
+.b-info{background:rgba(147,51,234,0.1);color:#c4b5fd;border:1px solid rgba(147,51,234,0.2);}
+.b-info::before{background:#c4b5fd;}
+.b-frozen{background:rgba(59,130,246,0.1);color:#93c5fd;border:1px solid rgba(59,130,246,0.25);}
+.b-frozen::before{background:#3b82f6;}
+
+/* KEY CODE */
+.kc{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--p3);
+  background:rgba(139,92,246,0.08);padding:3px 8px;border-radius:6px;border:1px solid rgba(139,92,246,0.18);}
+.mono{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);}
+
+/* API KEY BOX */
+.apikey-box{background:#000;border:1px solid var(--border2);border-radius:var(--r);
+  padding:10px 14px;display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.apikey-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--text3);min-width:58px;}
+.apikey-val{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--p3);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.apikey-copy{background:var(--glass);border:1px solid var(--border);border-radius:6px;
+  padding:4px 10px;font-size:10px;font-weight:600;color:var(--text2);cursor:pointer;
+  transition:all .15s;white-space:nowrap;border:none;}
+.apikey-copy:hover{background:var(--glassh);color:var(--p3);}
+.secret-mask{filter:blur(5px);transition:filter .3s;cursor:pointer;user-select:none;}
+.secret-mask:hover{filter:blur(0);}
+
+/* ── CUSTOM DROPDOWN ─────────────────────────────────────────────── */
+.custom-select{position:relative;user-select:none;}
+.cs-selected{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:11px 14px;background:rgba(139,92,246,0.05);
+  border:1px solid var(--border2);border-radius:var(--r);
+  color:var(--text);font-size:12px;font-weight:500;cursor:pointer;
+  transition:all .15s;gap:10px;
+}
+.cs-selected:hover{border-color:var(--p);background:rgba(139,92,246,0.08);}
+.cs-selected.open{border-color:var(--p);background:rgba(139,92,246,0.08);
+  border-bottom-left-radius:0;border-bottom-right-radius:0;}
+.cs-arrow{width:16px;height:16px;flex-shrink:0;transition:transform .2s;color:var(--text3);}
+.cs-selected.open .cs-arrow{transform:rotate(180deg);}
+.cs-label{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.cs-dropdown{
+  position:absolute;top:100%;left:0;right:0;z-index:999;
+  background:var(--bg3);border:1px solid var(--p);border-top:none;
+  border-bottom-left-radius:var(--r);border-bottom-right-radius:var(--r);
+  max-height:220px;overflow-y:auto;display:none;
+  box-shadow:0 16px 40px rgba(0,0,0,0.7);
+}
+.cs-dropdown.open{display:block;animation:ddO .15s ease;}
+@keyframes ddO{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.cs-opt{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 14px;font-size:12px;color:var(--text2);cursor:pointer;
+  transition:all .1s;border-bottom:1px solid rgba(139,92,246,0.06);
+}
+.cs-opt:last-child{border-bottom:none;}
+.cs-opt:hover{background:rgba(139,92,246,0.08);color:var(--text);}
+.cs-opt.selected{color:var(--p3);background:rgba(139,92,246,0.1);}
+.cs-opt.selected::after{content:'✓';margin-left:auto;font-size:11px;color:var(--p);}
+.cs-opt-icon{font-size:14px;width:20px;text-align:center;flex-shrink:0;}
+.cs-opt-main{display:flex;flex-direction:column;flex:1;}
+.cs-opt-label{font-size:12px;font-weight:500;}
+.cs-opt-sub{font-size:10px;color:var(--text3);margin-top:1px;}
+
+/* FORMS */
+.form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;margin-bottom:16px;}
+.fg{display:flex;flex-direction:column;gap:6px;}
+.fg label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);}
+.fg input{padding:11px 13px;background:rgba(139,92,246,0.05);border:1px solid var(--border2);
+  border-radius:var(--r);color:var(--text);font-family:'Inter',sans-serif;font-size:12px;outline:none;transition:all .15s;}
+.fg input:focus{border-color:var(--p);background:rgba(139,92,246,0.08);box-shadow:0 0 0 2px rgba(139,92,246,0.12);}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+.sw{position:relative;}
+.sw svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:13px;height:13px;color:var(--text3);pointer-events:none;}
+.search{padding:9px 12px 9px 32px;background:var(--glass);border:1px solid var(--border2);
+  border-radius:var(--r);color:var(--text);font-family:'Inter',sans-serif;font-size:12px;
+  outline:none;width:220px;transition:all .15s;}
+.search:focus{border-color:var(--p);width:260px;}
+.sel-filter{padding:9px 32px 9px 13px;background:var(--glass);border:1px solid var(--border2);
+  border-radius:var(--r);color:var(--text);font-family:'Inter',sans-serif;font-size:12px;
+  outline:none;appearance:none;cursor:pointer;transition:all .15s;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%234a4a7a' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 10px center;}
+.sel-filter:focus{border-color:var(--p);}
+.sel-filter option{background:var(--bg3);}
+
+/* DROPDOWN MENU */
+.dropdown{position:relative;display:inline-block;}
+.dd-menu{position:fixed;min-width:160px;
+  background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);
+  box-shadow:0 16px 40px rgba(0,0,0,0.8),0 0 0 1px rgba(139,92,246,0.15);
+  z-index:9999;display:none;overflow:hidden;}
+.dd-menu.open{display:block;animation:ddO .15s ease;}
+.dd-item{display:flex;align-items:center;gap:8px;padding:9px 13px;font-size:12px;
+  color:var(--text2);cursor:pointer;transition:all .1s;}
+.dd-item:hover{background:var(--glass);color:var(--text);}
+.dd-item.danger:hover{background:var(--p2dim);color:#9333ea;}
+.dd-sep{height:1px;background:var(--border);margin:3px 0;}
+
+/* CODE BLOCKS */
+.code{background:#000;border:1px solid var(--border);border-radius:var(--r);
+  padding:16px;font-family:'JetBrains Mono',monospace;font-size:11.5px;
+  color:#c9d1d9;line-height:1.75;overflow-x:auto;white-space:pre;margin-bottom:12px;}
+.code .cm{color:#484f58}.code .cs{color:#a5d6ff}.code .ck{color:#ff7b72}
+.code .cf{color:#d2a8ff}.code .cn{color:#79c0ff}.code .cv{color:#ffa657}
+
+/* TABS */
+.tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:16px;}
+.tab{padding:8px 18px;font-size:12px;font-weight:600;cursor:pointer;color:var(--text3);
+  border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;display:flex;align-items:center;gap:6px;}
+.tab:hover{color:var(--text);}
+.tab.active{color:var(--p3);border-bottom-color:var(--p);}
+.tab-content{display:none;}
+.tab-content.active{display:block;animation:fi .2s ease;}
+
+/* FILTER BAR */
+.filter-bar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center;}
+.live-pill{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:var(--p3);
+  background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.25);padding:4px 10px;border-radius:20px;}
+.live-pill::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--p);
+  box-shadow:0 0 6px var(--p);animation:blink 1.5s infinite;}
+
+/* GEN OUTPUT */
+.gen-out{background:#000;border:1px solid rgba(139,92,246,0.2);border-radius:var(--r);
+  padding:14px;font-family:'JetBrains Mono',monospace;font-size:11px;
+  color:var(--p3);line-height:2;max-height:200px;overflow-y:auto;display:none;white-space:pre-wrap;margin-top:12px;}
+
+/* PROGRESS */
+.prog-bar{height:3px;background:var(--bg4);border-radius:2px;overflow:hidden;margin-top:4px;}
+.prog-fill{height:100%;border-radius:2px;transition:width .4s ease;}
+
+/* APP CARD */
+.app-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);
+  padding:18px;margin-bottom:12px;transition:border-color .2s;}
+.app-card:hover{border-color:var(--border2);}
+.app-card-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;gap:12px;}
+.app-name{font-family:'Rajdhani',sans-serif;font-size:17px;font-weight:700;color:var(--text);}
+.app-desc{font-size:11px;color:var(--text3);margin-top:2px;}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:200;
+  display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+.modal-bg.open{display:flex;}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r2);
+  padding:30px;width:420px;max-width:95vw;box-shadow:0 0 0 1px rgba(139,92,246,0.1),0 40px 80px rgba(0,0,0,0.9);}
+.modal-title{font-family:'Rajdhani',sans-serif;font-size:19px;font-weight:700;
+  color:var(--text);margin-bottom:18px;display:flex;align-items:center;gap:10px;}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;}
+
+/* EMPTY */
+.empty{text-align:center;padding:48px 32px;}
+.empty-icon{font-size:36px;margin-bottom:10px;opacity:.3;}
+.empty-text{color:var(--text3);font-size:13px;}
+
+/* HWID */
+.hwid-cell{display:flex;align-items:center;gap:6px;}
+.hdot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.hdot.on{background:var(--p);box-shadow:0 0 4px var(--p);}
+.hdot.off{background:#2a2a4a;}
+
+/* TOAST */
+#toast{position:fixed;bottom:22px;right:22px;padding:11px 16px;border-radius:var(--r);
+  background:var(--bg3);border:1px solid var(--border2);font-size:12px;font-weight:500;
+  z-index:9999;display:none;box-shadow:0 12px 40px rgba(0,0,0,0.7);max-width:300px;}
+#toast.show{display:flex;align-items:center;gap:8px;animation:tin .2s ease;}
+#toast.success{border-left:3px solid var(--p);}
+#toast.error{border-left:3px solid #9333ea;}
+#toast.info{border-left:3px solid #c4b5fd;}
+@keyframes tin{from{transform:translateX(14px);opacity:0}to{transform:translateX(0);opacity:1}}
+.actions-cell{display:flex;gap:5px;align-items:center;}
+
+/* ACTIVITY FEED */
+.act-row{display:grid;grid-template-columns:60px 90px 1fr 90px;align-items:center;gap:10px;
+  padding:9px 18px;border-bottom:1px solid rgba(139,92,246,0.05);transition:background .1s;}
+.act-row:last-child{border-bottom:none;}
+.act-row:hover{background:rgba(139,92,246,0.03);}
+.act-time{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);white-space:nowrap;}
+.act-app{font-size:11px;font-weight:600;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.act-ip{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);text-align:right;white-space:nowrap;}
+
+/* DASH STAT CARDS */
+.dash-stat{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);
+  padding:16px 14px;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s;cursor:default;}
+.dash-stat:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(139,92,246,0.1);}
+.dash-stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.ds-icon{width:32px;height:32px;border-radius:8px;background:rgba(139,92,246,0.1);
+  display:flex;align-items:center;justify-content:center;margin-bottom:10px;color:var(--p3);}
+.ds-val{font-family:'Rajdhani',sans-serif;font-size:30px;font-weight:700;line-height:1;margin-bottom:3px;}
+.ds-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:8px;}
+.ds-bar{height:2px;background:rgba(139,92,246,0.08);border-radius:2px;overflow:hidden;}
+.ds-bar-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--p),var(--p2));transition:width .6s ease;}
+.sa::before{background:linear-gradient(90deg,#a78bfa,transparent)}.sa .ds-val{color:#a78bfa}
+.sb2::before{background:linear-gradient(90deg,#8b5cf6,transparent)}.sb2 .ds-val{color:#8b5cf6}
+.sc::before{background:linear-gradient(90deg,#9333ea,transparent)}.sc .ds-val{color:#9333ea}
+.sd::before{background:linear-gradient(90deg,#7c3aed,transparent)}.sd .ds-val{color:#7c3aed}
+.se::before{background:linear-gradient(90deg,#6d28d9,transparent)}.se .ds-val{color:#6d28d9}
+.sf::before{background:linear-gradient(90deg,#c4b5fd,transparent)}.sf .ds-val{color:#c4b5fd}
+
+/* SECURITY / SYSTEM ROWS */
+.sec-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(139,92,246,0.04);}
+.sec-row:last-child{border-bottom:none;}
+.sec-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.sec-dot.on{background:var(--p);box-shadow:0 0 5px var(--p);}
+.sec-dot.off{background:#2a2a4a;}
+.sec-label{flex:1;font-size:11px;color:var(--text2);}
+.sec-val{font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--p3);}
+.sys-row{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(139,92,246,0.04);}
+.sys-row:last-child{border-bottom:none;}
+.sys-key{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;}
+.kb-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.kb-label{font-size:10px;color:var(--text3);width:44px;flex-shrink:0;}
+.kb-bar-wrap{flex:1;height:4px;background:rgba(139,92,246,0.08);border-radius:2px;overflow:hidden;}
+.kb-bar{height:100%;border-radius:2px;transition:width .5s ease;}
+.kb-val{font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--text2);width:24px;text-align:right;flex-shrink:0;}
+
+/* SETTINGS ENHANCED */
+.settings-section{margin-bottom:20px;}
+.settings-row{display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px;background:rgba(139,92,246,0.03);border:1px solid var(--border);
+  border-radius:var(--r);margin-bottom:8px;transition:background .15s;}
+.settings-row:hover{background:rgba(139,92,246,0.06);}
+.settings-row-left{display:flex;flex-direction:column;gap:2px;}
+.settings-row-title{font-size:12px;font-weight:600;color:var(--text);}
+.settings-row-desc{font-size:10px;color:var(--text3);}
+.toggle-switch{position:relative;width:36px;height:20px;flex-shrink:0;}
+.toggle-switch input{opacity:0;width:0;height:0;}
+.toggle-slider{position:absolute;inset:0;background:#1a1a3a;border-radius:20px;cursor:pointer;transition:.2s;}
+.toggle-slider::before{content:'';position:absolute;height:14px;width:14px;left:3px;bottom:3px;
+  background:#4a4a7a;border-radius:50%;transition:.2s;}
+.toggle-switch input:checked+.toggle-slider{background:var(--p);}
+.toggle-switch input:checked+.toggle-slider::before{transform:translateX(16px);background:#fff;}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <img src="logo.png" class="login-logo-img" alt="BoostEmpire"/>
+    <span class="brand-big">BOOSTEMPIRE</span>
+    <span class="brand-sub">KeyAuth System</span>
+    <input class="inp" type="password" id="lp" placeholder="Admin password…" onkeydown="if(event.key==='Enter')doLogin()"/>
+    <button class="btn btn-primary" onclick="doLogin()">Sign In</button>
+    <div class="lerr" id="lerr"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <aside class="sidebar">
+    <div class="sb-top">
+      <img src="logo.png" class="sb-logo" alt="logo"/>
+      <div class="sb-brand-wrap">
+        <div class="s-brand">BOOSTEMPIRE</div>
+        <div class="s-sub">KeyAuth Panel</div>
+        <div class="s-status">Online</div>
+      </div>
+    </div>
+    <nav class="nav">
+      <div class="nav-sec">Overview</div>
+      <div class="nav-item active" data-page="dashboard" onclick="go('dashboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </div>
+      <div class="nav-sec">Applications</div>
+      <div class="nav-item" data-page="apps" onclick="go('apps')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        My Apps
+      </div>
+      <div class="nav-sec">Keys</div>
+      <div class="nav-item" data-page="keys" onclick="go('keys')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+        Manage Keys
+      </div>
+      <div class="nav-item" data-page="generate" onclick="go('generate')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        Generate Keys
+      </div>
+      <div class="nav-sec">Monitoring</div>
+      <div class="nav-item" data-page="logs" onclick="go('logs')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Auth Logs
+        <span class="nav-badge" id="log-badge"></span>
+      </div>
+      <div class="nav-item" data-page="blocks" onclick="go('blocks')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+        Blocked IPs
+        <span class="nav-badge" id="block-badge"></span>
+      </div>
+      <div class="nav-sec">Developer</div>
+      <div class="nav-item" data-page="sdk" onclick="go('sdk')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        SDK &amp; Integration
+      </div>
+      <div class="nav-sec">System</div>
+      <div class="nav-item" data-page="settings" onclick="go('settings')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+        Settings
+      </div>
+    </nav>
+    <div class="sb-foot">
+      <div class="user-row">
+        <div class="user-av"><img src="logo.png" alt="admin"/></div>
+        <div><div class="user-name">Admin</div><div class="user-role">BoostEmpire</div></div>
+      </div>
+      <button class="btn btn-ghost btn-sm" style="width:100%" onclick="logout()">Sign Out</button>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+
+      <!-- HEADER -->
+      <div class="ph" style="margin-bottom:20px">
+        <div>
+          <div class="pt">Dashboard <span>Overview</span></div>
+          <div style="font-size:11px;color:var(--text3);margin-top:3px">Welcome back, Admin — here's what's happening</div>
+        </div>
+        <div class="pa">
+          <div class="live-pill">Live</div>
+          <button class="btn btn-ghost btn-sm" onclick="loadDashboard()">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            Refresh
+          </button>
+          <button class="btn btn-purple btn-sm" onclick="go('apps')">+ New App</button>
+        </div>
+      </div>
+
+      <!-- STAT CARDS -->
+      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:20px">
+        <div class="dash-stat sa">
+          <div class="ds-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          </div>
+          <div class="ds-val" id="s-apps">0</div>
+          <div class="ds-label">Total Apps</div>
+          <div class="ds-bar"><div class="ds-bar-fill" id="sb-apps" style="width:0%"></div></div>
+        </div>
+        <div class="dash-stat sb2">
+          <div class="ds-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+          </div>
+          <div class="ds-val" id="s-total">0</div>
+          <div class="ds-label">Total Keys</div>
+          <div class="ds-bar"><div class="ds-bar-fill" id="sb-total" style="width:0%"></div></div>
+        </div>
+        <div class="dash-stat sc">
+          <div class="ds-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="ds-val" id="s-active">0</div>
+          <div class="ds-label">Active Keys</div>
+          <div class="ds-bar"><div class="ds-bar-fill" id="sb-active" style="width:0%"></div></div>
+        </div>
+        <div class="dash-stat sd">
+          <div class="ds-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <div class="ds-val" id="s-auths">0</div>
+          <div class="ds-label">Auths (1hr)</div>
+          <div class="ds-bar"><div class="ds-bar-fill" id="sb-auths" style="width:0%"></div></div>
+        </div>
+        <div class="dash-stat se">
+          <div class="ds-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <div class="ds-val" id="s-hwid">0</div>
+          <div class="ds-label">HWID Blocks</div>
+          <div class="ds-bar"><div class="ds-bar-fill" id="sb-hwid" style="width:0%"></div></div>
+        </div>
+        <div class="dash-stat sf">
+          <div class="ds-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+          </div>
+          <div class="ds-val" id="s-blocked">0</div>
+          <div class="ds-label">Blocked IPs</div>
+          <div class="ds-bar"><div class="ds-bar-fill" id="sb-blocked" style="width:0%"></div></div>
+        </div>
+      </div>
+
+      <!-- MAIN GRID -->
+      <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-bottom:16px">
+
+        <!-- RECENT ACTIVITY -->
+        <div class="card" style="padding:0;overflow:visible">
+          <div style="padding:16px 18px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="width:28px;height:28px;background:var(--pdim);border-radius:8px;display:flex;align-items:center;justify-content:center">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--p3)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              </div>
+              <span style="font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:1px;color:var(--p3);text-transform:uppercase">Recent Activity</span>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="go('logs')" style="font-size:11px">View All →</button>
+          </div>
+          <div id="dash-activity-wrap">
+            <div id="dash-logs-list" style="padding:6px 0">
+              <div style="text-align:center;padding:36px;color:var(--text3);font-size:12px">
+                <div style="font-size:32px;margin-bottom:8px;opacity:.3">📭</div>
+                No activity yet
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN -->
+        <div style="display:flex;flex-direction:column;gap:14px">
+
+          <!-- SECURITY STATUS -->
+          <div class="card" style="padding:16px 18px">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+              <div style="width:28px;height:28px;background:var(--pdim);border-radius:8px;display:flex;align-items:center;justify-content:center">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--p3)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              </div>
+              <span style="font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:1px;color:var(--p3);text-transform:uppercase">Security Status</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div class="sec-row">
+                <div class="sec-dot on"></div>
+                <span class="sec-label">Rate Limiting</span>
+                <span class="sec-val">30 req/min</span>
+              </div>
+              <div class="sec-row">
+                <div class="sec-dot on"></div>
+                <span class="sec-label">HWID Hashing</span>
+                <span class="sec-val">SHA-256 salted</span>
+              </div>
+              <div class="sec-row">
+                <div class="sec-dot on"></div>
+                <span class="sec-label">Auto IP Block</span>
+                <span class="sec-val">80 fails</span>
+              </div>
+              <div class="sec-row">
+                <div class="sec-dot on"></div>
+                <span class="sec-label">Anti-Debug (C++)</span>
+                <span class="sec-val">BSOD loop</span>
+              </div>
+              <div class="sec-row">
+                <div class="sec-dot on"></div>
+                <span class="sec-label">Anti-VM (C++)</span>
+                <span class="sec-val">5 layers</span>
+              </div>
+              <div class="sec-row">
+                <div class="sec-dot on"></div>
+                <span class="sec-label">Crack Tool Scan</span>
+                <span class="sec-val">30+ blacklisted</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- QUICK ENDPOINT -->
+          <div class="card" style="padding:16px 18px">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+              <div style="width:28px;height:28px;background:var(--pdim);border-radius:8px;display:flex;align-items:center;justify-content:center">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--p3)" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+              </div>
+              <span style="font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:1px;color:var(--p3);text-transform:uppercase">API Endpoint</span>
+            </div>
+            <div style="background:#000;border:1px solid var(--border);border-radius:8px;padding:12px;font-family:'JetBrains Mono',monospace;font-size:10.5px;line-height:1.8;color:#a0a0c0">
+              <span style="color:#484f58">// POST from your app</span><br/>
+              <span style="color:#ffa657">POST</span> <span style="color:#a5d6ff">http://boostempire.auth:8080/api/auth</span><br/>
+              <span style="color:#79c0ff">x-public-key</span><span style="color:#a0a0c0">: </span><span style="color:#a5d6ff">pk_xxxx…</span><br/>
+              <span style="color:#a0a0c0">{ </span><span style="color:#79c0ff">"key"</span><span style="color:#a0a0c0">: </span><span style="color:#a5d6ff">"BE-XXXX"</span><span style="color:#a0a0c0">, </span><span style="color:#79c0ff">"hwid"</span><span style="color:#a0a0c0">: </span><span style="color:#a5d6ff">"BE-HW-…"</span><span style="color:#a0a0c0"> }</span>
+            </div>
+            <button class="btn btn-purple btn-sm" style="width:100%;margin-top:10px;font-size:11px" onclick="go('sdk')">View SDK &amp; Integration →</button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- BOTTOM ROW -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
+
+        <!-- KEY USAGE -->
+        <div class="card" style="padding:16px 18px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+            <div style="width:28px;height:28px;background:var(--pdim);border-radius:8px;display:flex;align-items:center;justify-content:center">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--p3)" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            </div>
+            <span style="font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:1px;color:var(--p3);text-transform:uppercase">Key Breakdown</span>
+          </div>
+          <div id="dash-key-breakdown">
+            <div style="color:var(--text3);font-size:12px;text-align:center;padding:16px">No keys yet</div>
+          </div>
+        </div>
+
+        <!-- QUICK ACTIONS -->
+        <div class="card" style="padding:16px 18px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+            <div style="width:28px;height:28px;background:var(--pdim);border-radius:8px;display:flex;align-items:center;justify-content:center">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--p3)" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </div>
+            <span style="font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:1px;color:var(--p3);text-transform:uppercase">Quick Actions</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <button class="btn btn-ghost btn-sm" style="width:100%;justify-content:flex-start;gap:10px" onclick="go('apps')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+              Create New App
+            </button>
+            <button class="btn btn-ghost btn-sm" style="width:100%;justify-content:flex-start;gap:10px" onclick="go('generate')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              Generate Keys
+            </button>
+            <button class="btn btn-ghost btn-sm" style="width:100%;justify-content:flex-start;gap:10px" onclick="go('logs')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              View Auth Logs
+            </button>
+            <button class="btn btn-ghost btn-sm" style="width:100%;justify-content:flex-start;gap:10px" onclick="go('blocks')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+              Blocked IPs
+            </button>
+            <button class="btn btn-ghost btn-sm" style="width:100%;justify-content:flex-start;gap:10px" onclick="go('sdk')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+              SDK &amp; Integration
+            </button>
+          </div>
+        </div>
+
+        <!-- SYSTEM INFO -->
+        <div class="card" style="padding:16px 18px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+            <div style="width:28px;height:28px;background:var(--pdim);border-radius:8px;display:flex;align-items:center;justify-content:center">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--p3)" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+            </div>
+            <span style="font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:1px;color:var(--p3);text-transform:uppercase">System</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:7px">
+            <div class="sys-row"><span class="sys-key">Version</span><span class="kc" style="font-size:10px">v4.0</span></div>
+            <div class="sys-row"><span class="sys-key">URL</span><span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--p3)">boostempire.auth:8080</span></div>
+            <div class="sys-row"><span class="sys-key">Port</span><span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--p3)">80</span></div>
+            <div class="sys-row"><span class="sys-key">Database</span><span style="font-size:10px;color:var(--text2)">NeDB (local)</span></div>
+            <div class="sys-row"><span class="sys-key">Status</span><div style="display:flex;align-items:center;gap:5px"><div style="width:6px;height:6px;border-radius:50%;background:var(--p);box-shadow:0 0 5px var(--p);animation:blink 2s infinite"></div><span style="font-size:10px;color:var(--p3)">Online</span></div></div>
+            <div class="sys-row"><span class="sys-key">Uptime</span><span style="font-size:10px;color:var(--text2)" id="dash-uptime">—</span></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- APPS -->
+    <div class="page" id="page-apps">
+      <div class="ph">
+        <div class="pt">My <span>Apps</span></div>
+        <div class="pa"><button class="btn btn-purple" onclick="openNewAppModal()">+ Create App</button></div>
+      </div>
+      <div id="apps-list"><div class="empty"><div class="empty-icon">📱</div><div class="empty-text">No apps — create one to get started</div></div></div>
+    </div>
+
+    <!-- MANAGE KEYS -->
+    <div class="page" id="page-keys">
+      <div class="ph">
+        <div class="pt">Manage <span>Keys</span></div>
+        <div class="pa">
+          <div class="sw">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input class="search" id="key-search" placeholder="Search key, label…" oninput="filterKeys()"/>
+          </div>
+          <select class="sel-filter" id="key-app-filter" onchange="filterKeys()" style="width:140px">
+            <option value="">All Apps</option>
+          </select>
+          <select class="sel-filter" id="key-status-filter" onchange="filterKeys()" style="width:115px">
+            <option value="">All Status</option>
+            <option value="active">Active</option>
+            <option value="frozen">Frozen</option>
+            <option value="banned">Banned</option>
+          </select>
+          <button class="btn btn-purple" onclick="go('generate')">+ Generate</button>
+        </div>
+      </div>
+      <div class="card" style="padding:0;">
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>License Key</th><th>App</th><th>Label</th><th>Status</th><th>Uses</th><th>HWID</th><th>Expires</th><th>Last Auth</th><th>Actions</th></tr></thead>
+            <tbody id="keys-body"><tr><td colspan="9"><div class="empty"><div class="empty-icon">🔑</div><div class="empty-text">No keys yet</div></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- GENERATE -->
+    <div class="page" id="page-generate">
+      <div class="ph"><div class="pt">Generate <span>Keys</span></div></div>
+      <div style="display:grid;grid-template-columns:1fr 300px;gap:16px">
+        <div class="card">
+          <div class="card-title" style="margin-bottom:18px">🔑 Key Configuration</div>
+          <div class="form-grid">
+            <div class="fg">
+              <label>App</label>
+              <div class="custom-select" id="cs-app">
+                <div class="cs-selected" onclick="toggleCS('cs-app')">
+                  <span class="cs-label" id="cs-app-label">— Select an App —</span>
+                  <svg class="cs-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+                <div class="cs-dropdown" id="cs-app-menu"></div>
+              </div>
+              <input type="hidden" id="g-app"/>
+            </div>
+            <div class="fg">
+              <label>Quantity</label>
+              <div class="custom-select" id="cs-count">
+                <div class="cs-selected" onclick="toggleCS('cs-count')">
+                  <span class="cs-label" id="cs-count-label">1 key</span>
+                  <svg class="cs-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+                <div class="cs-dropdown" id="cs-count-menu">
+                  <div class="cs-opt selected" data-val="1" onclick="selectCS('cs-count','1','1 key')"><span class="cs-opt-icon">1️⃣</span><div class="cs-opt-main"><span class="cs-opt-label">1 key</span><span class="cs-opt-sub">Single license</span></div></div>
+                  <div class="cs-opt" data-val="5" onclick="selectCS('cs-count','5','5 keys')"><span class="cs-opt-icon">5️⃣</span><div class="cs-opt-main"><span class="cs-opt-label">5 keys</span><span class="cs-opt-sub">Small batch</span></div></div>
+                  <div class="cs-opt" data-val="10" onclick="selectCS('cs-count','10','10 keys')"><span class="cs-opt-icon">🔟</span><div class="cs-opt-main"><span class="cs-opt-label">10 keys</span></div></div>
+                  <div class="cs-opt" data-val="25" onclick="selectCS('cs-count','25','25 keys')"><span class="cs-opt-icon">📦</span><div class="cs-opt-main"><span class="cs-opt-label">25 keys</span></div></div>
+                  <div class="cs-opt" data-val="50" onclick="selectCS('cs-count','50','50 keys')"><span class="cs-opt-icon">📦</span><div class="cs-opt-main"><span class="cs-opt-label">50 keys</span></div></div>
+                  <div class="cs-opt" data-val="100" onclick="selectCS('cs-count','100','100 keys')"><span class="cs-opt-icon">💯</span><div class="cs-opt-main"><span class="cs-opt-label">100 keys</span><span class="cs-opt-sub">Large batch</span></div></div>
+                  <div class="cs-opt" data-val="250" onclick="selectCS('cs-count','250','250 keys')"><span class="cs-opt-icon">🏭</span><div class="cs-opt-main"><span class="cs-opt-label">250 keys</span></div></div>
+                  <div class="cs-opt" data-val="500" onclick="selectCS('cs-count','500','500 keys')"><span class="cs-opt-icon">🚀</span><div class="cs-opt-main"><span class="cs-opt-label">500 keys</span><span class="cs-opt-sub">Maximum batch</span></div></div>
+                </div>
+              </div>
+              <input type="hidden" id="g-count" value="1"/>
+            </div>
+            <div class="fg">
+              <label>Label / Note</label>
+              <input type="text" id="g-label" placeholder="e.g. Order #123, Discord User"/>
+            </div>
+            <div class="fg">
+              <label>Product Name</label>
+              <input type="text" id="g-product" value="Default"/>
+            </div>
+            <div class="fg">
+              <label>Max Uses Per Key</label>
+              <div class="custom-select" id="cs-uses">
+                <div class="cs-selected" onclick="toggleCS('cs-uses')">
+                  <span class="cs-label" id="cs-uses-label">1 use — single machine</span>
+                  <svg class="cs-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+                <div class="cs-dropdown" id="cs-uses-menu">
+                  <div class="cs-opt selected" data-val="1" onclick="selectCS('cs-uses','1','1 use — single machine')"><span class="cs-opt-icon">🔒</span><div class="cs-opt-main"><span class="cs-opt-label">1 use</span><span class="cs-opt-sub">Single machine, HWID locked</span></div></div>
+                  <div class="cs-opt" data-val="2" onclick="selectCS('cs-uses','2','2 uses')"><span class="cs-opt-icon">2️⃣</span><div class="cs-opt-main"><span class="cs-opt-label">2 uses</span></div></div>
+                  <div class="cs-opt" data-val="3" onclick="selectCS('cs-uses','3','3 uses')"><span class="cs-opt-icon">3️⃣</span><div class="cs-opt-main"><span class="cs-opt-label">3 uses</span></div></div>
+                  <div class="cs-opt" data-val="5" onclick="selectCS('cs-uses','5','5 uses')"><span class="cs-opt-icon">5️⃣</span><div class="cs-opt-main"><span class="cs-opt-label">5 uses</span></div></div>
+                  <div class="cs-opt" data-val="10" onclick="selectCS('cs-uses','10','10 uses')"><span class="cs-opt-icon">🔟</span><div class="cs-opt-main"><span class="cs-opt-label">10 uses</span></div></div>
+                  <div class="cs-opt" data-val="25" onclick="selectCS('cs-uses','25','25 uses')"><span class="cs-opt-icon">📊</span><div class="cs-opt-main"><span class="cs-opt-label">25 uses</span></div></div>
+                  <div class="cs-opt" data-val="50" onclick="selectCS('cs-uses','50','50 uses')"><span class="cs-opt-icon">📊</span><div class="cs-opt-main"><span class="cs-opt-label">50 uses</span></div></div>
+                  <div class="cs-opt" data-val="100" onclick="selectCS('cs-uses','100','100 uses')"><span class="cs-opt-icon">💯</span><div class="cs-opt-main"><span class="cs-opt-label">100 uses</span></div></div>
+                  <div class="cs-opt" data-val="999" onclick="selectCS('cs-uses','999','Unlimited (999)')"><span class="cs-opt-icon">♾️</span><div class="cs-opt-main"><span class="cs-opt-label">Unlimited</span><span class="cs-opt-sub">Up to 999 uses</span></div></div>
+                </div>
+              </div>
+              <input type="hidden" id="g-uses" value="1"/>
+            </div>
+            <div class="fg">
+              <label>Expires After</label>
+              <div class="custom-select" id="cs-days">
+                <div class="cs-selected" onclick="toggleCS('cs-days')">
+                  <span class="cs-label" id="cs-days-label">Never expires</span>
+                  <svg class="cs-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+                <div class="cs-dropdown" id="cs-days-menu">
+                  <div class="cs-opt selected" data-val="0" onclick="selectCS('cs-days','0','Never expires')"><span class="cs-opt-icon">♾️</span><div class="cs-opt-main"><span class="cs-opt-label">Never expires</span><span class="cs-opt-sub">Permanent license</span></div></div>
+                  <div class="cs-opt" data-val="1" onclick="selectCS('cs-days','1','1 day')"><span class="cs-opt-icon">📅</span><div class="cs-opt-main"><span class="cs-opt-label">1 day</span><span class="cs-opt-sub">Trial / demo</span></div></div>
+                  <div class="cs-opt" data-val="3" onclick="selectCS('cs-days','3','3 days')"><span class="cs-opt-icon">📅</span><div class="cs-opt-main"><span class="cs-opt-label">3 days</span></div></div>
+                  <div class="cs-opt" data-val="7" onclick="selectCS('cs-days','7','7 days — 1 week')"><span class="cs-opt-icon">📅</span><div class="cs-opt-main"><span class="cs-opt-label">7 days</span><span class="cs-opt-sub">1 week</span></div></div>
+                  <div class="cs-opt" data-val="14" onclick="selectCS('cs-days','14','14 days — 2 weeks')"><span class="cs-opt-icon">📅</span><div class="cs-opt-main"><span class="cs-opt-label">14 days</span><span class="cs-opt-sub">2 weeks</span></div></div>
+                  <div class="cs-opt" data-val="30" onclick="selectCS('cs-days','30','30 days — 1 month')"><span class="cs-opt-icon">🗓️</span><div class="cs-opt-main"><span class="cs-opt-label">30 days</span><span class="cs-opt-sub">1 month</span></div></div>
+                  <div class="cs-opt" data-val="60" onclick="selectCS('cs-days','60','60 days — 2 months')"><span class="cs-opt-icon">🗓️</span><div class="cs-opt-main"><span class="cs-opt-label">60 days</span><span class="cs-opt-sub">2 months</span></div></div>
+                  <div class="cs-opt" data-val="90" onclick="selectCS('cs-days','90','90 days — 3 months')"><span class="cs-opt-icon">🗓️</span><div class="cs-opt-main"><span class="cs-opt-label">90 days</span><span class="cs-opt-sub">3 months</span></div></div>
+                  <div class="cs-opt" data-val="180" onclick="selectCS('cs-days','180','180 days — 6 months')"><span class="cs-opt-icon">🗓️</span><div class="cs-opt-main"><span class="cs-opt-label">180 days</span><span class="cs-opt-sub">6 months</span></div></div>
+                  <div class="cs-opt" data-val="365" onclick="selectCS('cs-days','365','365 days — 1 year')"><span class="cs-opt-icon">🗓️</span><div class="cs-opt-main"><span class="cs-opt-label">365 days</span><span class="cs-opt-sub">1 year</span></div></div>
+                </div>
+              </div>
+              <input type="hidden" id="g-days" value="0"/>
+            </div>
+          </div>
+          <button class="btn btn-purple" onclick="generateKeys()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            Generate Keys
+          </button>
+          <div class="gen-out" id="gen-out"></div>
+          <div id="gen-actions" style="display:none;gap:8px;margin-top:10px">
+            <button class="btn btn-ghost btn-sm" onclick="copyGen()">📋 Copy All</button>
+            <button class="btn btn-ghost btn-sm" onclick="dlGen()">💾 Download .txt</button>
+          </div>
+        </div>
+        <div>
+          <div class="card">
+            <div class="card-title" style="margin-bottom:12px">💡 Tips</div>
+            <div style="color:var(--text2);font-size:12px;line-height:2.1">
+              🔒 <b style="color:var(--text)">HWID</b> locks on first use<br/>
+              📱 <b style="color:var(--text)">App</b> must be selected<br/>
+              🔑 Use <b style="color:var(--text)">Public Key</b> in your code<br/>
+              ♾️ <b style="color:var(--text)">0 days</b> = never expires<br/>
+              ⚡ Max <b style="color:var(--text)">500 keys</b> per batch
+            </div>
+          </div>
+          <div class="card" style="margin-top:0">
+            <div class="card-title" style="margin-bottom:10px">🛡️ Security</div>
+            <div style="display:flex;flex-direction:column;gap:6px;font-size:11px">
+              <div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:#000;border-radius:6px">
+                <span style="color:var(--p)">✓</span><span style="color:var(--text2)">Rate limiting (30 req/min)</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:#000;border-radius:6px">
+                <span style="color:var(--p)">✓</span><span style="color:var(--text2)">HWID hashed (SHA-256)</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:#000;border-radius:6px">
+                <span style="color:var(--p)">✓</span><span style="color:var(--text2)">Auto IP block (80 fails)</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:#000;border-radius:6px">
+                <span style="color:var(--p)">✓</span><span style="color:var(--text2)">Timing-safe comparison</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:#000;border-radius:6px">
+                <span style="color:var(--p)">✓</span><span style="color:var(--text2)">BSOD on crack attempt (C++)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOGS -->
+    <div class="page" id="page-logs">
+      <div class="ph">
+        <div class="pt">Auth <span>Logs</span></div>
+        <div class="pa">
+          <div class="live-pill">Live</div>
+          <button class="btn btn-ghost btn-sm" onclick="loadLogs()">↻ Refresh</button>
+          <button class="btn btn-danger btn-sm" onclick="clearLogs()">🗑 Clear</button>
+        </div>
+      </div>
+      <div class="filter-bar">
+        <div class="sw">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input class="search" id="log-search" placeholder="Filter key or HWID…" oninput="filterLogs()"/>
+        </div>
+        <select class="sel-filter" id="log-filter" onchange="filterLogs()" style="width:185px">
+          <option value="">All Results</option>
+          <option value="SUCCESS">✅ Success</option>
+          <option value="HWID_BOUND">🔗 HWID Bound</option>
+          <option value="HWID_MISMATCH">🔒 HWID Mismatch</option>
+          <option value="INVALID_KEY">❌ Invalid Key</option>
+          <option value="INVALID_PUBLIC_KEY">🚫 Bad API Key</option>
+          <option value="BANNED">🚫 Banned</option>
+          <option value="EXPIRED">⏰ Expired</option>
+          <option value="MAX_USES">📊 Max Uses</option>
+          <option value="RATE_LIMITED">⚠️ Rate Limited</option>
+          <option value="INVALID_HWID">🔒 Invalid HWID</option>
+          <option value="FROZEN">❄️ Frozen</option>
+        </select>
+        <span id="log-count" style="color:var(--text3);font-size:11px"></span>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Timestamp</th><th>App</th><th>License Key</th><th>HWID</th><th>IP</th><th>Result</th><th>Details</th></tr></thead>
+            <tbody id="logs-body"><tr><td colspan="7"><div class="empty"><div class="empty-icon">📋</div><div class="empty-text">No logs yet</div></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- BLOCKED IPs -->
+    <div class="page" id="page-blocks">
+      <div class="ph">
+        <div class="pt">Blocked <span>IPs</span></div>
+        <div class="pa">
+          <button class="btn btn-ghost btn-sm" onclick="loadBlocks()">↻ Refresh</button>
+        </div>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>IP Address</th><th>Reason</th><th>Blocked At</th><th>Actions</th></tr></thead>
+            <tbody id="blocks-body"><tr><td colspan="4"><div class="empty"><div class="empty-icon">✅</div><div class="empty-text">No blocked IPs</div></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- SDK -->
+    <div class="page" id="page-sdk">
+      <div class="ph"><div class="pt">SDK &amp; <span>Integration</span></div></div>
+      <div class="card" style="margin-bottom:16px;border-color:rgba(139,92,246,0.25)">
+        <div class="card-title" style="margin-bottom:12px">🛡️ Protection Layers</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px">
+          <div style="background:#000;border:1px solid var(--border);border-radius:var(--r);padding:12px;text-align:center">
+            <div style="font-size:22px;margin-bottom:6px">🔍</div><div style="font-size:10px;font-weight:700;color:var(--p3)">ANTI-DEBUG</div>
+            <div style="font-size:10px;color:var(--text3);margin-top:3px">PEB flags, timing, HW breakpoints</div>
+          </div>
+          <div style="background:#000;border:1px solid var(--border);border-radius:var(--r);padding:12px;text-align:center">
+            <div style="font-size:22px;margin-bottom:6px">💻</div><div style="font-size:10px;font-weight:700;color:var(--p3)">ANTI-VM</div>
+            <div style="font-size:10px;color:var(--text3);margin-top:3px">CPUID hypervisor, VMware, VBox</div>
+          </div>
+          <div style="background:#000;border:1px solid var(--border);border-radius:var(--r);padding:12px;text-align:center">
+            <div style="font-size:22px;margin-bottom:6px">⚰️</div><div style="font-size:10px;font-weight:700;color:var(--p3)">BSOD TRIGGER</div>
+            <div style="font-size:10px;color:var(--text3);margin-top:3px">NtRaiseHardError on detection</div>
+          </div>
+          <div style="background:#000;border:1px solid var(--border);border-radius:var(--r);padding:12px;text-align:center">
+            <div style="font-size:22px;margin-bottom:6px">🔫</div><div style="font-size:10px;font-weight:700;color:var(--p3)">PROCESS KILL</div>
+            <div style="font-size:10px;color:var(--text3);margin-top:3px">x64dbg, CheatEngine, IDA, dnSpy…</div>
+          </div>
+          <div style="background:#000;border:1px solid var(--border);border-radius:var(--r);padding:12px;text-align:center">
+            <div style="font-size:22px;margin-bottom:6px">⏱️</div><div style="font-size:10px;font-weight:700;color:var(--p3)">RATE LIMIT</div>
+            <div style="font-size:10px;color:var(--text3);margin-top:3px">30 req/min, auto IP block</div>
+          </div>
+          <div style="background:#000;border:1px solid var(--border);border-radius:var(--r);padding:12px;text-align:center">
+            <div style="font-size:22px;margin-bottom:6px">🔐</div><div style="font-size:10px;font-weight:700;color:var(--p3)">HWID HASHED</div>
+            <div style="font-size:10px;color:var(--text3);margin-top:3px">SHA-256 salted, never stored raw</div>
+          </div>
+        </div>
+      </div>
+      <div class="tabs">
+        <div class="tab active" onclick="sdkTab(this,'cpp')">⚙️ C++ (Anti-Crack)</div>
+        <div class="tab" onclick="sdkTab(this,'python')">🐍 Python</div>
+        <div class="tab" onclick="sdkTab(this,'node')">🟩 Node.js</div>
+        <div class="tab" onclick="sdkTab(this,'api')">📡 API Ref</div>
+      </div>
+      <div class="tab-content active" id="sdk-cpp">
+        <div class="card">
+          <div class="card-hdr">
+            <div class="card-title">C++ — boostempire_auth.h (Full Anti-Crack)</div>
+            <button class="btn btn-ghost btn-sm" onclick="copyCode('sdk-cpp')">📋 Copy</button>
+          </div>
+          <p style="color:var(--text2);font-size:12px;margin-bottom:10px">
+            Download <span class="kc">boostempire_auth.h</span> — Link: <span class="kc">winhttp.lib</span> + <span class="kc">wbemuuid.lib</span><br/>
+            Sets <span style="color:#ff7b72">BSOD</span> on debugger/cracker. Edit <span class="kc">BE_PUBLIC_KEY</span> at top of header.
+          </p>
+          <div class="code"><span class="cm">// 1. Download boostempire_auth.h (see Download button below)
+// 2. Set your public key in the header
+// 3. Add to your project and link winhttp.lib + wbemuuid.lib</span>
+
+<span class="ck">#include</span> <span class="cs">"boostempire_auth.h"</span>
+
+<span class="ck">int</span> <span class="cf">main</span>() {
+    <span class="cm">// Runs ALL checks: anti-debug, anti-VM, process scan, then auth</span>
+    BoostAuth::<span class="cf">validate</span>(<span class="cs">"BE-YOURLICENSEKEYHERE"</span>, <span class="cs">"MyApp"</span>);
+
+    <span class="cm">// If we reach here — user is authenticated, not debugging, not cracking</span>
+    <span class="cn">MessageBoxA</span>(NULL, <span class="cs">"Welcome!"</span>, <span class="cs">"MyApp"</span>, MB_OK);
+    <span class="ck">return</span> 0;
+}
+
+<span class="cm">// What happens on crack attempt:
+//   Debugger detected  → BSOD (NtRaiseHardError)
+//   x64dbg / IDA open  → BSOD
+//   VM detected        → Exit with message
+//   Wrong HWID         → BSOD
+//   Banned key         → BSOD
+//   No server          → Error + exit</span></div>
+          <a href="boostempire_auth.h" download class="btn btn-purple btn-sm" style="text-decoration:none;margin-top:8px">⬇ Download boostempire_auth.h</a>
+        </div>
+      </div>
+      <div class="tab-content" id="sdk-python">
+        <div class="card">
+          <div class="card-hdr"><div class="card-title">Python SDK</div><button class="btn btn-ghost btn-sm" onclick="copyCode('sdk-python')">📋 Copy</button></div>
+          <div class="code"><span class="cm"># boostempire_auth.py  |  pip install requests</span>
+<span class="ck">import</span> requests, uuid, hashlib, platform, subprocess, sys
+
+PUBLIC_KEY = <span class="cs">"pk_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"</span>  <span class="cm"># from My Apps</span>
+BASE_URL   = <span class="cs">"http://boostempire.auth"</span>
+
+<span class="ck">class</span> <span class="cf">BoostEmpireAuth</span>:
+    <span class="ck">def</span> <span class="cf">__init__</span>(self, app_name=<span class="cs">"MyApp"</span>):
+        self.app_name = app_name
+        self.hwid = self._hwid()
+
+    <span class="ck">def</span> <span class="cf">_hwid</span>(self):
+        <span class="ck">try</span>:
+            p = platform.system()
+            <span class="ck">if</span> p == <span class="cs">"Windows"</span>:
+                raw = subprocess.check_output(<span class="cs">"wmic csproduct get uuid"</span>,shell=<span class="cn">True</span>).decode().split(<span class="cs">"\n"</span>)[1].strip()
+            <span class="ck">elif</span> p == <span class="cs">"Linux"</span>:
+                raw = open(<span class="cs">"/etc/machine-id"</span>).read().strip()
+            <span class="ck">else</span>:
+                raw = subprocess.check_output([<span class="cs">"ioreg"</span>,<span class="cs">"-rd1"</span>,<span class="cs">"-c"</span>,<span class="cs">"IOPlatformExpertDevice"</span>]).decode()
+                raw = [l <span class="ck">for</span> l <span class="ck">in</span> raw.split(<span class="cs">"\n"</span>) <span class="ck">if</span> <span class="cs">"UUID"</span> <span class="ck">in</span> l][0].split(<span class="cs">'"'</span>)[-2]
+        <span class="ck">except</span>: raw = str(uuid.getnode())
+        <span class="ck">return</span> <span class="cs">"BE-HW-"</span> + hashlib.sha256(raw.encode()).hexdigest()[:24].upper()
+
+    <span class="ck">def</span> <span class="cf">login</span>(self, key, exit_on_fail=<span class="cn">True</span>):
+        <span class="ck">try</span>:
+            r = requests.post(f<span class="cs">"{BASE_URL}/api/auth"</span>,
+                headers={<span class="cs">"x-public-key"</span>: PUBLIC_KEY},
+                json={<span class="cs">"key"</span>:key,<span class="cs">"hwid"</span>:self.hwid,<span class="cs">"app_name"</span>:self.app_name},
+                timeout=5).json()
+        <span class="ck">except</span>:
+            print(<span class="cs">"[BoostEmpire] Cannot reach auth server"</span>); sys.exit(1)
+        <span class="ck">if</span> r[<span class="cs">"success"</span>]:
+            d=r[<span class="cs">"data"</span>]; print(f<span class="cs">"[✅] {d['app']} | {d['product']} | Uses {d['uses']}/{d['max_uses']}"</span>)
+            <span class="ck">return True</span>
+        print(f<span class="cs">"[❌] {r['message']} ({r['code']})"</span>)
+        <span class="ck">if</span> exit_on_fail: sys.exit(1)
+        <span class="ck">return False</span>
+
+auth = <span class="cf">BoostEmpireAuth</span>(<span class="cs">"MyApp"</span>)
+auth.login(<span class="cs">"BE-YOURLICENSEKEYHERE"</span>)</div>
+        </div>
+      </div>
+      <div class="tab-content" id="sdk-node">
+        <div class="card">
+          <div class="card-hdr"><div class="card-title">Node.js SDK</div><button class="btn btn-ghost btn-sm" onclick="copyCode('sdk-node')">📋 Copy</button></div>
+          <div class="code"><span class="cm">// boostempire-auth.js — zero dependencies</span>
+<span class="ck">const</span> http=require(<span class="cs">'http'</span>),{execSync}=require(<span class="cs">'child_process'</span>),
+      crypto=require(<span class="cs">'crypto'</span>),os=require(<span class="cs">'os'</span>);
+
+<span class="ck">const</span> PUBLIC_KEY=<span class="cs">'pk_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'</span>; <span class="cm">// from My Apps</span>
+<span class="ck">const</span> BASE={host:<span class="cs">'boostempire.auth:8080'</span>,port:80};
+
+<span class="ck">function</span> <span class="cn">getHWID</span>(){
+  <span class="ck">try</span>{
+    <span class="ck">let</span> raw;
+    <span class="ck">if</span>(process.platform===<span class="cs">'win32'</span>)
+      raw=execSync(<span class="cs">'wmic csproduct get uuid'</span>,{timeout:3000}).toString().split(<span class="cs">'\n'</span>)[1].trim();
+    <span class="ck">else if</span>(process.platform===<span class="cs">'linux'</span>)
+      raw=require(<span class="cs">'fs'</span>).readFileSync(<span class="cs">'/etc/machine-id'</span>,<span class="cs">'utf8'</span>).trim();
+    <span class="ck">else</span>
+      raw=execSync(<span class="cs">'ioreg -rd1 -c IOPlatformExpertDevice'</span>).toString()
+            .match(/"IOPlatformUUID"\s*=\s*"([^"]+)"/)[1];
+    <span class="ck">return</span> <span class="cs">'BE-HW-'</span>+crypto.createHash(<span class="cs">'sha256'</span>).update(raw).digest(<span class="cs">'hex'</span>).slice(0,24).toUpperCase();
+  }<span class="ck">catch</span>{
+    <span class="ck">const</span> mac=Object.values(os.networkInterfaces()).flat()
+      .find(i=>!i.internal&&i.mac!==<span class="cs">'00:00:00:00:00:00'</span>)?.mac||<span class="cs">'unknown'</span>;
+    <span class="ck">return</span> <span class="cs">'BE-HW-'</span>+crypto.createHash(<span class="cs">'sha256'</span>).update(mac).digest(<span class="cs">'hex'</span>).slice(0,24).toUpperCase();
+  }
+}
+<span class="ck">function</span> <span class="cn">boostAuth</span>(key,appName=<span class="cs">'MyApp'</span>){
+  <span class="ck">return new</span> Promise((res,rej)=>{
+    <span class="ck">const</span> body=JSON.stringify({key,hwid:getHWID(),app_name:appName});
+    <span class="ck">const</span> req=http.request({...BASE,path:<span class="cs">'/api/auth'</span>,method:<span class="cs">'POST'</span>,
+      headers:{<span class="cs">'Content-Type'</span>:<span class="cs">'application/json'</span>,<span class="cs">'x-public-key'</span>:PUBLIC_KEY,
+               <span class="cs">'Content-Length'</span>:Buffer.byteLength(body)}},
+      r=>{<span class="ck">let</span> d=<span class="cs">''</span>;r.on(<span class="cs">'data'</span>,c=>d+=c);r.on(<span class="cs">'end'</span>,()=>{
+        <span class="ck">const</span> j=JSON.parse(d);
+        <span class="ck">if</span>(j.success){console.log(<span class="cs">`[✅] ${j.data.app} | ${j.data.product}`</span>);res(j.data);}
+        <span class="ck">else</span>{console.error(<span class="cs">`[❌] ${j.message}`</span>);process.exit(1);}
+      });});
+    req.on(<span class="cs">'error'</span>,()=>{console.error(<span class="cs">'[BE] Unreachable'</span>);process.exit(1);});
+    req.write(body);req.end();
+  });
+}
+module.exports={boostAuth,getHWID};
+<span class="cm">// await boostAuth('BE-YOURKEYHERE','MyApp');</span></div>
+        </div>
+      </div>
+      <div class="tab-content" id="sdk-api">
+        <div class="card">
+          <div class="card-hdr"><div class="card-title">API Reference</div></div>
+          <div class="code"><span class="cm">// POST /api/auth</span>
+Header: x-public-key: <span class="cs">pk_xxxxxxxx</span>
+Body: { <span class="cs">"key"</span>:<span class="cs">"BE-XXX"</span>, <span class="cs">"hwid"</span>:<span class="cs">"BE-HW-xxxx"</span>, <span class="cs">"app_name"</span>:<span class="cs">"MyApp"</span> }
+
+<span class="cm">// ✅ Success</span>
+{ <span class="cs">"success"</span>:<span class="ck">true</span>, <span class="cs">"code"</span>:<span class="cs">"OK"</span>, <span class="cs">"data"</span>:{ <span class="cs">"app"</span>:<span class="cs">"MyApp"</span>, <span class="cs">"product"</span>:<span class="cs">"Default"</span>,
+  <span class="cs">"expires_at"</span>:<span class="cs">null</span>, <span class="cs">"uses"</span>:1, <span class="cs">"max_uses"</span>:5, <span class="cs">"uses_left"</span>:4, <span class="cs">"hwid_locked"</span>:<span class="ck">true</span> }}
+
+<span class="cm">// ❌ Codes</span>
+<span class="cv">NO_PUBLIC_KEY</span>     — missing x-public-key header
+<span class="cv">INVALID_PUBLIC_KEY</span>— key doesn't match any app
+<span class="cv">NO_KEY / NO_HWID</span>  — missing fields
+<span class="cv">INVALID_HWID</span>      — suspicious HWID rejected
+<span class="cv">INVALID_KEY</span>       — key not found in app
+<span class="cv">BANNED</span>            — key banned
+<span class="cv">EXPIRED</span>           — past expiry
+<span class="cv">MAX_USES</span>          — used too many times
+<span class="cv">HWID_MISMATCH</span>     — wrong machine
+<span class="cv">RATE_LIMITED</span>      — too many requests
+<span class="cv">IP_BLOCKED</span>        — IP permanently blocked</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="page" id="page-settings">
+      <div class="ph" style="margin-bottom:22px">
+        <div>
+          <div class="pt">System <span>Settings</span></div>
+          <div style="font-size:11px;color:var(--text3);margin-top:3px">Manage your BoostEmpire KeyAuth configuration</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:860px">
+
+        <!-- LEFT COLUMN -->
+        <div style="display:flex;flex-direction:column;gap:14px">
+
+          <!-- CHANGE PASSWORD -->
+          <div class="card">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+              <div style="width:32px;height:32px;background:var(--pdim);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px">🔐</div>
+              <div>
+                <div style="font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;color:var(--p3);letter-spacing:1px;text-transform:uppercase">Change Password</div>
+                <div style="font-size:10px;color:var(--text3);margin-top:1px">Update your admin panel password</div>
+              </div>
+            </div>
+            <div class="fg" style="margin-bottom:10px"><label>New Password (min 6 chars)</label><input class="inp" type="password" id="np1" placeholder="New password…"/></div>
+            <div class="fg" style="margin-bottom:14px"><label>Confirm Password</label><input class="inp" type="password" id="np2" placeholder="Confirm password…"/></div>
+            <button class="btn btn-primary" onclick="changePw()">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              Update Password
+            </button>
+          </div>
+
+          <!-- SECURITY TOGGLES -->
+          <div class="card">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+              <div style="width:32px;height:32px;background:var(--pdim);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px">🛡️</div>
+              <div>
+                <div style="font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;color:var(--p3);letter-spacing:1px;text-transform:uppercase">Security Features</div>
+                <div style="font-size:10px;color:var(--text3);margin-top:1px">Active protection layers (read-only)</div>
+              </div>
+            </div>
+            <div class="settings-row">
+              <div class="settings-row-left">
+                <div class="settings-row-title">Rate Limiting</div>
+                <div class="settings-row-desc">Max 30 requests per minute per IP</div>
+              </div>
+              <span class="badge b-active">30 req/min</span>
+            </div>
+            <div class="settings-row">
+              <div class="settings-row-left">
+                <div class="settings-row-title">Auto IP Block</div>
+                <div class="settings-row-desc">Permanently block after 80 failed auths</div>
+              </div>
+              <span class="badge b-active">80 fails</span>
+            </div>
+            <div class="settings-row">
+              <div class="settings-row-left">
+                <div class="settings-row-title">HWID Hashing</div>
+                <div class="settings-row-desc">Hardware IDs stored as SHA-256 hash</div>
+              </div>
+              <span class="badge b-active">SHA-256</span>
+            </div>
+            <div class="settings-row">
+              <div class="settings-row-left">
+                <div class="settings-row-title">BSOD Anti-Crack (C++)</div>
+                <div class="settings-row-desc">Triggers system crash on debugger/cracker</div>
+              </div>
+              <span class="badge b-active">Active</span>
+            </div>
+            <div class="settings-row">
+              <div class="settings-row-left">
+                <div class="settings-row-title">Anti-VM Detection</div>
+                <div class="settings-row-desc">Detects VMware, VirtualBox, QEMU, KVM</div>
+              </div>
+              <span class="badge b-active">5 layers</span>
+            </div>
+            <div class="settings-row">
+              <div class="settings-row-left">
+                <div class="settings-row-title">Process Blacklist</div>
+                <div class="settings-row-desc">x64dbg, IDA, CheatEngine, dnSpy, Ghidra…</div>
+              </div>
+              <span class="badge b-active">30+ tools</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN -->
+        <div style="display:flex;flex-direction:column;gap:14px">
+
+          <!-- SYSTEM INFO -->
+          <div class="card">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+              <div style="width:32px;height:32px;background:var(--pdim);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px">ℹ️</div>
+              <div>
+                <div style="font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;color:var(--p3);letter-spacing:1px;text-transform:uppercase">System Info</div>
+                <div style="font-size:10px;color:var(--text3);margin-top:1px">Current server configuration</div>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div class="settings-row" style="padding:10px 14px">
+                <span style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Version</span>
+                <span class="kc" style="font-size:11px">v4.0</span>
+              </div>
+              <div class="settings-row" style="padding:10px 14px">
+                <span style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Server</span>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--p3)">boostempire.auth:8080</span>
+              </div>
+              <div class="settings-row" style="padding:10px 14px">
+                <span style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Database</span>
+                <span style="font-size:11px;color:var(--text2)">NeDB (local flat-file)</span>
+              </div>
+              <div class="settings-row" style="padding:10px 14px">
+                <span style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Status</span>
+                <div style="display:flex;align-items:center;gap:6px">
+                  <div style="width:6px;height:6px;border-radius:50%;background:var(--p);box-shadow:0 0 6px var(--p);animation:blink 2s infinite"></div>
+                  <span style="font-size:11px;color:var(--p3)">Online</span>
+                </div>
+              </div>
+              <div class="settings-row" style="padding:10px 14px">
+                <span style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Sessions</span>
+                <span style="font-size:11px;color:var(--text2)">In-memory (per restart)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- DANGER ZONE -->
+          <div class="card" style="border-color:rgba(109,40,217,0.3)">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+              <div style="width:32px;height:32px;background:rgba(109,40,217,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px">⚠️</div>
+              <div>
+                <div style="font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;color:#9333ea;letter-spacing:1px;text-transform:uppercase">Danger Zone</div>
+                <div style="font-size:10px;color:var(--text3);margin-top:1px">Destructive actions — use with care</div>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div class="settings-row" style="border-color:rgba(109,40,217,0.2)">
+                <div class="settings-row-left">
+                  <div class="settings-row-title">Clear All Logs</div>
+                  <div class="settings-row-desc">Permanently delete all auth log entries</div>
+                </div>
+                <button class="btn btn-danger btn-sm" onclick="clearLogs()">Clear Logs</button>
+              </div>
+              <div class="settings-row" style="border-color:rgba(109,40,217,0.2)">
+                <div class="settings-row-left">
+                  <div class="settings-row-title">Unblock All IPs</div>
+                  <div class="settings-row-desc">Remove all IP blocks from the blocklist</div>
+                </div>
+                <button class="btn btn-danger btn-sm" onclick="unblockAllIPs()">Unblock All</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ABOUT -->
+          <div class="card" style="background:linear-gradient(135deg,rgba(139,92,246,0.06) 0%,rgba(0,0,0,0) 100%)">
+            <div style="text-align:center;padding:8px 0">
+              <div style="font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;letter-spacing:3px;background:linear-gradient(135deg,#c4b5fd,#8b5cf6,#6d28d9);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">BOOSTEMPIRE</div>
+              <div style="font-size:9px;letter-spacing:3px;color:var(--text3);margin-top:3px;text-transform:uppercase">KeyAuth System v4.0</div>
+              <div style="margin-top:12px;font-size:11px;color:var(--text3);line-height:1.8">
+                Self-hosted license authentication<br/>with C++ anti-crack protection
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- NEW APP MODAL -->
+<div class="modal-bg" id="modal-new-app">
+  <div class="modal">
+    <div class="modal-title">📱 Create New App</div>
+    <div class="fg" style="margin-bottom:12px">
+      <label>App Name</label>
+      <input class="inp" id="modal-app-name" placeholder="e.g. MyCheat, Discord Bot, Tool v2"/>
+    </div>
+    <div class="fg">
+      <label>Description (optional)</label>
+      <input class="inp" id="modal-app-desc" placeholder="What is this app?"/>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-purple" onclick="createApp()">Create App</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+let TOKEN='', allKeys=[], allLogs=[], allApps=[], logTimer=null;
+
+// LOGIN
+async function doLogin(){
+  const pass=document.getElementById('lp').value.trim();
+  const err=document.getElementById('lerr');
+  err.textContent='';
+  if(!pass){err.textContent='Enter your password.';return;}
+  try{
+    const d=await post('/api/admin/login',{password:pass});
+    if(d.success){
+      TOKEN=d.token;
+      document.getElementById('login-screen').style.display='none';
+      document.getElementById('app').classList.add('on');
+      go('dashboard'); startPoll();
+    } else err.textContent='Wrong password. Default: boostempire123';
+  } catch{ err.textContent='Cannot reach server — is start.bat running?'; }
+}
+function logout(){
+  clearInterval(logTimer); TOKEN='';
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('app').classList.remove('on');
+  document.getElementById('lp').value='';
+}
+
+// NAV
+function go(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>{if(n.dataset.page===page)n.classList.add('active');});
+  if(page==='dashboard') loadDashboard();
+  if(page==='apps') loadApps();
+  if(page==='keys') loadKeys();
+  if(page==='logs') loadLogs();
+  if(page==='blocks') loadBlocks();
+}
+
+// DASHBOARD
+let dashStartTime = Date.now();
+async function loadDashboard(){
+  const r=await get('/api/admin/stats');
+  if(!r.success)return;
+  const s=r.stats;
+
+  // Animate stat values
+  anim('s-apps',s.totalApps);
+  anim('s-total',s.total);
+  anim('s-active',s.active);
+  anim('s-auths',s.recentAuths);
+  anim('s-hwid',s.hwidBlocks);
+  anim('s-blocked',s.blockedIPs);
+
+  // Animate stat bar fills (relative to total keys as max)
+  const mx = Math.max(s.total, 1);
+  setTimeout(()=>{
+    setBar('sb-apps',   Math.min((s.totalApps/Math.max(s.totalApps,1))*100,100));
+    setBar('sb-total',  100);
+    setBar('sb-active', (s.active/mx)*100);
+    setBar('sb-auths',  Math.min(s.recentAuths*5,100));
+    setBar('sb-hwid',   Math.min(s.hwidBlocks*10,100));
+    setBar('sb-blocked',Math.min(s.blockedIPs*20,100));
+  },200);
+
+  // Key breakdown card
+  const kb = document.getElementById('dash-key-breakdown');
+  if(s.total===0){
+    kb.innerHTML='<div style="color:var(--text3);font-size:12px;text-align:center;padding:16px">No keys yet</div>';
+  } else {
+    const banned = s.banned||0;
+    const used   = s.used||0;
+    const unused = s.total - used;
+    const pActive = Math.round((s.active/s.total)*100);
+    const pUsed   = Math.round((used/s.total)*100);
+    const pBanned = Math.round((banned/s.total)*100);
+    kb.innerHTML = `
+      <div class="kb-row">
+        <span class="kb-label">Active</span>
+        <div class="kb-bar-wrap"><div class="kb-bar" style="width:${pActive}%;background:#8b5cf6"></div></div>
+        <span class="kb-val">${s.active}</span>
+      </div>
+      <div class="kb-row">
+        <span class="kb-label">Used</span>
+        <div class="kb-bar-wrap"><div class="kb-bar" style="width:${pUsed}%;background:#7c3aed"></div></div>
+        <span class="kb-val">${used}</span>
+      </div>
+      <div class="kb-row">
+        <span class="kb-label">Banned</span>
+        <div class="kb-bar-wrap"><div class="kb-bar" style="width:${pBanned}%;background:#6d28d9"></div></div>
+        <span class="kb-val">${banned}</span>
+      </div>
+      <div class="kb-row">
+        <span class="kb-label">Unused</span>
+        <div class="kb-bar-wrap"><div class="kb-bar" style="width:${Math.round((unused/s.total)*100)}%;background:#4a4a7a"></div></div>
+        <span class="kb-val">${unused}</span>
+      </div>`;
+  }
+
+  // Uptime
+  const secs = Math.floor((Date.now()-dashStartTime)/1000);
+  const h=Math.floor(secs/3600), m=Math.floor((secs%3600)/60), sec=secs%60;
+  const ut=document.getElementById('dash-uptime');
+  if(ut) ut.textContent = `${h}h ${m}m ${sec}s`;
+
+  // Activity feed
+  const lr=await get('/api/admin/logs');
+  const feed=document.getElementById('dash-logs-list');
+  if(!lr.success||!lr.logs.length){
+    feed.innerHTML='<div style="text-align:center;padding:36px;color:var(--text3);font-size:12px"><div style="font-size:32px;margin-bottom:8px;opacity:.3">📭</div>No activity yet</div>';
+    return;
+  }
+  feed.innerHTML=lr.logs.slice(0,10).map(l=>{
+    const badge=rb(l.result);
+    const t=fmtTimeShort(l.timestamp);
+    return `<div class="act-row">
+      <span class="act-time">${t}</span>
+      <span class="act-app">${l.app_name||'—'}</span>
+      ${badge}
+      <span class="act-ip">${l.ip||'—'}</span>
+    </div>`;
+  }).join('');
+}
+
+function setBar(id,pct){
+  const el=document.getElementById(id);
+  if(el) el.style.width=Math.max(0,Math.min(100,pct))+'%';
+}
+
+function fmtTimeShort(iso){
+  if(!iso)return'—';
+  const d=new Date(iso);
+  return d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
+}
+
+function anim(id,target){
+  const el=document.getElementById(id);
+  if(!el)return;
+  const start=parseInt(el.textContent)||0;
+  if(start===target){el.textContent=target;return;}
+  const steps=24;let i=0;
+  const t=setInterval(()=>{
+    i++;
+    el.textContent=Math.round(start+(target-start)*(i/steps));
+    if(i>=steps){el.textContent=target;clearInterval(t);}
+  },18);
+}
+
+// APPS
+async function loadApps(){
+  const r=await get('/api/admin/apps');
+  if(!r.success)return;
+  allApps=r.apps;
+  // Populate generate app dropdown
+  const menu=document.getElementById('cs-app-menu');
+  menu.innerHTML=allApps.map(a=>`
+    <div class="cs-opt" data-val="${a._id}" onclick="selectCSApp('${a._id}','${a.name}')">
+      <span class="cs-opt-icon">📱</span>
+      <div class="cs-opt-main">
+        <span class="cs-opt-label">${a.name}</span>
+        <span class="cs-opt-sub">${a.active?'Active':'Disabled'} · ${a.publicKey.substring(0,20)}…</span>
+      </div>
+    </div>`).join('');
+  // Populate key filter
+  const kf=document.getElementById('key-app-filter');
+  kf.innerHTML='<option value="">All Apps</option>'+allApps.map(a=>`<option value="${a._id}">${a.name}</option>`).join('');
+
+  const el=document.getElementById('apps-list');
+  if(!r.apps.length){
+    el.innerHTML='<div class="empty"><div class="empty-icon">📱</div><div class="empty-text">No apps — create one to get started</div></div>';return;
+  }
+  el.innerHTML=r.apps.map(a=>`
+    <div class="app-card">
+      <div class="app-card-hdr">
+        <div>
+          <div class="app-name">${a.name} <span class="badge ${a.active?'b-active':'b-expired'}" style="vertical-align:middle">${a.active?'Active':'Disabled'}</span></div>
+          <div class="app-desc">${a.description||'No description'} &nbsp;·&nbsp; ${a.createdAt?a.createdAt.substring(0,10):'—'}</div>
+        </div>
+        <div style="display:flex;gap:7px;flex-wrap:wrap">
+          <button class="btn btn-ghost btn-sm" onclick="toggleApp('${a._id}',${a.active})">${a.active?'Disable':'Enable'}</button>
+          <button class="btn btn-ghost btn-sm" onclick="rotateKeys('${a._id}')">↺ Rotate Keys</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteApp('${a._id}')">🗑</button>
+        </div>
+      </div>
+      <div class="apikey-box">
+        <span class="apikey-label">Public Key</span>
+        <span class="apikey-val" id="pk-${a._id}">${a.publicKey}</span>
+        <button class="apikey-copy" data-copy="${a.publicKey}" onclick="copyFromAttr(this)">Copy</button>
+      </div>
+      <div class="apikey-box">
+        <span class="apikey-label">Secret Key</span>
+        <span class="apikey-val secret-mask" id="sk-${a._id}" title="Hover to reveal">${a.secretKey}</span>
+        <button class="apikey-copy" data-copy="${a.secretKey}" onclick="copyFromAttr(this)">Copy</button>
+      </div>
+      <div style="margin-top:10px;padding:8px 13px;background:#000;border-radius:var(--r);font-size:11px;color:var(--text3)">
+        In your code: &nbsp;<span style="color:var(--p3);font-family:'JetBrains Mono',monospace;font-size:11px">x-public-key: ${a.publicKey}</span>
+      </div>
+    </div>
+  `).join('');
+}
+function selectCSApp(id, name){
+  document.getElementById('g-app').value=id;
+  document.getElementById('cs-app-label').textContent=name;
+  document.querySelectorAll('#cs-app-menu .cs-opt').forEach(o=>{
+    o.classList.toggle('selected', o.dataset.val===id);
+  });
+  closeAllCS();
+}
+function openNewAppModal(){document.getElementById('modal-new-app').classList.add('open');}
+function closeModal(){document.getElementById('modal-new-app').classList.remove('open');}
+async function createApp(){
+  const name=document.getElementById('modal-app-name').value.trim();
+  const description=document.getElementById('modal-app-desc').value.trim();
+  if(!name){toast('Enter an app name','error');return;}
+  const r=await post('/api/admin/apps',{name,description});
+  if(r.success){closeModal();document.getElementById('modal-app-name').value='';document.getElementById('modal-app-desc').value='';toast(`"${name}" created!`,'success');loadApps();}
+}
+async function deleteApp(id){
+  if(!confirm('Delete this app?'))return;
+  const r=await del('/api/admin/apps/'+id);
+  if(r.success){toast('App deleted','error');loadApps();}
+}
+async function toggleApp(id,active){
+  const r=await post('/api/admin/apps/'+id+'/toggle');
+  if(r.success){toast(r.active?'App enabled':'App disabled','info');loadApps();}
+}
+async function rotateKeys(id){
+  if(!confirm('Rotate API keys? Your code will need updating.'))return;
+  const r=await post('/api/admin/apps/'+id+'/rotate');
+  if(r.success){toast('Keys rotated — update your code!','info');document.getElementById('pk-'+id).textContent=r.publicKey;document.getElementById('sk-'+id).textContent=r.secretKey;loadApps();}
+}
+
+// CUSTOM SELECT
+function toggleCS(id){
+  const sel=document.getElementById(id);
+  const btn=sel.querySelector('.cs-selected');
+  const menu=sel.querySelector('.cs-dropdown');
+  const wasOpen=menu.classList.contains('open');
+  closeAllCS();
+  if(!wasOpen){btn.classList.add('open');menu.classList.add('open');}
+}
+function selectCS(id, val, label){
+  document.getElementById(id.replace('cs-','g-')).value=val;
+  document.getElementById(id+'-label').textContent=label;
+  document.querySelectorAll('#'+id+'-menu .cs-opt').forEach(o=>{
+    o.classList.toggle('selected', o.dataset.val===String(val));
+  });
+  closeAllCS();
+}
+function closeAllCS(){
+  document.querySelectorAll('.cs-selected').forEach(b=>b.classList.remove('open'));
+  document.querySelectorAll('.cs-dropdown').forEach(m=>m.classList.remove('open'));
+}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.custom-select')&&!e.target.closest('.dropdown'))closeAllCS();
+  if(!e.target.closest('.dropdown'))closeDD();
+});
+
+// KEYS
+async function loadKeys(){
+  const r=await get('/api/admin/keys');
+  if(r.success){allKeys=r.keys;filterKeys();}
+}
+function filterKeys(){
+  const q=document.getElementById('key-search').value.toLowerCase();
+  const af=document.getElementById('key-app-filter').value;
+  const sf=document.getElementById('key-status-filter').value;
+  let keys=allKeys;
+  if(q) keys=keys.filter(k=>k.key.toLowerCase().includes(q)||(k.label||'').toLowerCase().includes(q));
+  if(af) keys=keys.filter(k=>k.appId===af);
+  if(sf) keys=keys.filter(k=>k.status===sf);
+  renderKeys(keys);
+}
+function renderKeys(keys){
+  const tb=document.getElementById('keys-body');
+  if(!keys.length){tb.innerHTML='<tr><td colspan="9"><div class="empty"><div class="empty-icon">🔑</div><div class="empty-text">No keys found</div></div></td></tr>';return;}
+  tb.innerHTML=keys.map(k=>{
+    const exp=k.expiresAt&&new Date(k.expiresAt)<new Date();
+    const st=exp?'expired':k.status;
+    const bc=st==='active'?'b-active':st==='frozen'?'b-frozen':st==='banned'?'b-banned':'b-expired';
+    const pct=k.max_uses>0?Math.round((k.uses/k.max_uses)*100):0;
+    const hwid=k.hwid
+      ?`<div class="hwid-cell" title="${k.hwidRaw||''}"><div class="hdot on"></div><span class="mono" style="font-size:10px">${k.hwidRaw||'Bound'}</span></div>`
+      :`<div class="hwid-cell"><div class="hdot off"></div><span style="color:var(--text3);font-size:11px">Unbound</span></div>`;
+    // Ban/Unban button only shown for active/banned, freeze shown for active/frozen
+    const banBtn = k.status==='banned'
+      ? `<button class="btn btn-ghost btn-xs" onclick="toggleKey('${k.key}')">Unban</button>`
+      : k.status!=='frozen' ? `<button class="btn btn-danger btn-xs" onclick="toggleKey('${k.key}')">Ban</button>` : '';
+    const freezeBtn = k.status==='frozen'
+      ? `<button class="btn btn-ghost btn-xs" style="color:#93c5fd;border-color:rgba(59,130,246,0.3)" onclick="unfreezeKey('${k.key}')">❄ Unfreeze</button>`
+      : k.status==='active' ? `<button class="btn btn-ghost btn-xs" onclick="freezeKey('${k.key}')">❄ Freeze</button>` : '';
+    return `<tr>
+      <td><span class="kc">${k.key}</span></td>
+      <td style="color:var(--text2);font-size:11px">${k.appName||'—'}</td>
+      <td style="color:var(--text3);font-size:11px">${k.label||'—'}</td>
+      <td><span class="badge ${bc}">${st}</span></td>
+      <td>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:3px">Unlimited</div>
+        <div class="prog-bar" style="width:55px"><div class="prog-fill" style="width:100%;background:#8b5cf6"></div></div>
+      </td>
+      <td>${hwid}</td>
+      <td style="font-size:11px;color:var(--text2)">${k.expiresAt?k.expiresAt.substring(0,10):'<span style="color:var(--text3)">Never</span>'}</td>
+      <td class="mono" style="font-size:10px">${k.lastUsed?fmtTime(k.lastUsed):'<span style="color:var(--text3)">—</span>'}</td>
+      <td class="actions-cell">
+        ${freezeBtn}
+        ${banBtn}
+        <div class="dropdown">
+          <button class="btn btn-ghost btn-xs" onclick="toggleDD(this)">⋯</button>
+          <div class="dd-menu">
+            <div class="dd-item" onclick="resetHWID('${k.key}');closeDD()">↺ Reset HWID</div>
+            <div class="dd-item" onclick="copyText('${k.key}');closeDD()">📋 Copy Key</div>
+            <div class="dd-sep"></div>
+            <div class="dd-item danger" onclick="delKey('${k.key}');closeDD()">🗑 Delete</div>
+          </div>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+async function toggleKey(key){
+  const r=await post(`/api/admin/keys/${encodeURIComponent(key)}/toggle`);
+  if(r.success){toast(r.status==='banned'?'Key banned':'Key unbanned','info');loadKeys();}
+}
+async function freezeKey(key){
+  const r=await post(`/api/admin/keys/${encodeURIComponent(key)}/freeze`);
+  if(r.success){toast('Key frozen — users will be kicked','info');loadKeys();}
+  else toast(r.message||'Error','error');
+}
+async function unfreezeKey(key){
+  const r=await post(`/api/admin/keys/${encodeURIComponent(key)}/unfreeze`);
+  if(r.success){toast('Key unfrozen — users can auth again','success');loadKeys();}
+  else toast(r.message||'Error','error');
+}
+async function resetHWID(key){
+  if(!confirm('Reset HWID?'))return;
+  const r=await post(`/api/admin/keys/${encodeURIComponent(key)}/reset-hwid`);
+  if(r.success){toast('HWID reset','info');loadKeys();}
+}
+async function delKey(key){
+  if(!confirm('Delete key?'))return;
+  const r=await del(`/api/admin/keys/${encodeURIComponent(key)}`);
+  if(r.success){toast('Deleted','error');loadKeys();}
+}
+
+// GENERATE
+async function generateKeys(){
+  const appId=document.getElementById('g-app').value;
+  if(!appId){toast('Select an app first','error');return;}
+  const days=parseInt(document.getElementById('g-days').value)||0;
+  const r=await post('/api/admin/generate',{
+    appId,
+    count:parseInt(document.getElementById('g-count').value)||1,
+    label:document.getElementById('g-label').value,
+    product:document.getElementById('g-product').value||'Default',
+    max_uses:parseInt(document.getElementById('g-uses').value)||1,
+    expires_days:days>0?days:null
+  });
+  if(r.success){
+    const out=document.getElementById('gen-out');
+    out.style.display='block';out.textContent=r.keys.join('\n');
+    document.getElementById('gen-actions').style.display='flex';
+    toast(`Generated ${r.keys.length} key${r.keys.length>1?'s':''}!`,'success');
+  } else toast(r.message,'error');
+}
+function copyGen(){navigator.clipboard.writeText(document.getElementById('gen-out').textContent);toast('Copied!','success');}
+function dlGen(){
+  const a=document.createElement('a');
+  a.href='data:text/plain,'+encodeURIComponent(document.getElementById('gen-out').textContent);
+  a.download='boostempire-keys.txt';a.click();
+}
+
+// LOGS
+async function loadLogs(){
+  const r=await get('/api/admin/logs');
+  if(r.success){allLogs=r.logs;document.getElementById('log-count').textContent=r.logs.length+' entries';filterLogs();}
+}
+function filterLogs(){
+  const q=document.getElementById('log-search').value.toLowerCase();
+  const rf=document.getElementById('log-filter').value;
+  let logs=allLogs;
+  if(rf) logs=logs.filter(l=>l.result===rf);
+  if(q) logs=logs.filter(l=>(l.key||'').toLowerCase().includes(q)||(l.hwid||'').toLowerCase().includes(q)||(l.ip||'').includes(q));
+  renderLogs(logs);
+}
+function renderLogs(logs){
+  const tb=document.getElementById('logs-body');
+  if(!logs.length){tb.innerHTML='<tr><td colspan="7"><div class="empty"><div class="empty-icon">🔍</div><div class="empty-text">No logs match</div></div></td></tr>';return;}
+  tb.innerHTML=logs.map(l=>`<tr>
+    <td class="mono" style="font-size:10px;white-space:nowrap">${fmtTime(l.timestamp)}</td>
+    <td style="color:var(--text2);font-size:11px">${l.app_name||'—'}</td>
+    <td><span class="kc" style="font-size:10px">${(l.key||'—').substring(0,18)}…</span></td>
+    <td class="mono" style="font-size:10px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${l.hwid||''}">${l.hwid||'<span style="color:var(--text3)">—</span>'}</td>
+    <td class="mono" style="font-size:10px">${l.ip||'—'}</td>
+    <td>${rb(l.result)}</td>
+    <td style="color:var(--text3);font-size:11px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${l.details||''}">${l.details||'—'}</td>
+  </tr>`).join('');
+}
+async function clearLogs(){
+  if(!confirm('Clear all logs?'))return;
+  const r=await del('/api/admin/logs');
+  if(r.success){allLogs=[];renderLogs([]);document.getElementById('log-count').textContent='0 entries';toast('Cleared','info');}
+}
+
+// BLOCKS
+async function loadBlocks(){
+  const r=await get('/api/admin/blocks');
+  if(!r.success)return;
+  const tb=document.getElementById('blocks-body');
+  const badge=document.getElementById('block-badge');
+  if(!r.blocks.length){
+    badge.style.display='none';
+    tb.innerHTML='<tr><td colspan="4"><div class="empty"><div class="empty-icon">✅</div><div class="empty-text">No blocked IPs</div></div></td></tr>';return;
+  }
+  badge.textContent=r.blocks.length;badge.style.display='inline';
+  tb.innerHTML=r.blocks.map(b=>`<tr>
+    <td><span class="kc">${b.ip}</span></td>
+    <td style="color:var(--text2);font-size:11px">${b.reason||'—'}</td>
+    <td class="mono" style="font-size:10px">${b.blockedAt?b.blockedAt.substring(0,19).replace('T',' '):'—'}</td>
+    <td><button class="btn btn-ghost btn-xs" onclick="unblockIP('${b.ip}')">Unblock</button></td>
+  </tr>`).join('');
+}
+async function unblockAllIPs(){
+  if(!confirm('Unblock ALL IPs? This cannot be undone.'))return;
+  const r=await get('/api/admin/blocks');
+  if(!r.success||!r.blocks.length){toast('No blocked IPs','info');return;}
+  await Promise.all(r.blocks.map(b=>del('/api/admin/blocks/'+encodeURIComponent(b.ip))));
+  toast(`Unblocked ${r.blocks.length} IPs`,'success');loadBlocks();
+}
+async function unblockIP(ip){
+  const r=await del('/api/admin/blocks/'+encodeURIComponent(ip));
+  if(r.success){toast(`${ip} unblocked`,'success');loadBlocks();}
+}
+
+// POLL
+function startPoll(){
+  logTimer=setInterval(async()=>{
+    const r=await get('/api/admin/logs').catch(()=>null);
+    if(!r||!r.success)return;
+    if(r.logs.length>allLogs.length&&allLogs.length>0){
+      const diff=r.logs.length-allLogs.length;
+      const b=document.getElementById('log-badge');
+      b.textContent='+'+diff;b.style.display='inline';
+      setTimeout(()=>b.style.display='none',5000);
+    }
+    allLogs=r.logs;
+    if(document.getElementById('page-logs').classList.contains('active'))filterLogs();
+    if(document.getElementById('page-dashboard').classList.contains('active'))loadDashboard();
+  },5000);
+}
+
+// SDK TABS
+function sdkTab(el,id){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');document.getElementById('sdk-'+id).classList.add('active');
+}
+function copyCode(cid){
+  navigator.clipboard.writeText(document.querySelector('#'+cid+' .code').textContent);
+  toast('Code copied!','success');
+}
+
+// SETTINGS
+async function changePw(){
+  const p1=document.getElementById('np1').value;
+  const p2=document.getElementById('np2').value;
+  if(!p1)return toast('Enter a password','error');
+  if(p1!==p2)return toast('Passwords do not match','error');
+  const r=await post('/api/admin/change-password',{newPassword:p1});
+  if(r.success){TOKEN=p1;toast('Password updated!','success');document.getElementById('np1').value='';document.getElementById('np2').value='';}
+}
+
+// DROPDOWN
+function toggleDD(btn){
+  closeDD();
+  const m=btn.nextElementSibling;
+  const rect=btn.getBoundingClientRect();
+  const menuH=120; // approx menu height
+  // Position: open upward if near bottom of screen
+  const top = rect.bottom + menuH > window.innerHeight
+    ? rect.top - menuH
+    : rect.bottom + 4;
+  m.style.top = top + 'px';
+  m.style.left = (rect.right - 160) + 'px';
+  m.classList.add('open');
+}
+function closeDD(){document.querySelectorAll('.dd-menu').forEach(m=>{m.classList.remove('open');m.style.top='';m.style.left='';});}
+
+// MODAL
+document.getElementById('modal-new-app').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeAllCS();}});
+
+// HTTP
+async function get(url){const r=await fetch(url,{headers:{'x-admin-token':TOKEN}});return r.json();}
+async function post(url,body={}){const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','x-admin-token':TOKEN},body:JSON.stringify(body)});return r.json();}
+async function del(url){const r=await fetch(url,{method:'DELETE',headers:{'x-admin-token':TOKEN}});return r.json();}
+function copyText(t){navigator.clipboard.writeText(t);toast('Copied!','success');}
+function copyFromAttr(btn){
+  const val=btn.getAttribute('data-copy');
+  if(!val)return;
+  navigator.clipboard.writeText(val).then(()=>{
+    const orig=btn.textContent;btn.textContent='✓ Copied';
+    setTimeout(()=>btn.textContent=orig,1500);
+    toast('Copied!','success');
+  }).catch(()=>{
+    // Fallback for non-https
+    const ta=document.createElement('textarea');
+    ta.value=val;ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.select();document.execCommand('copy');
+    document.body.removeChild(ta);
+    const orig=btn.textContent;btn.textContent='✓ Copied';
+    setTimeout(()=>btn.textContent=orig,1500);
+    toast('Copied!','success');
+  });
+}
+
+function rb(result){
+  const m={
+    SUCCESS:['b-ok','✅ Success'],HWID_BOUND:['b-info','🔗 HWID Bound'],
+    HWID_MISMATCH:['b-fail','🔒 HWID Mismatch'],INVALID_KEY:['b-fail','❌ Invalid Key'],
+    INVALID_PUBLIC_KEY:['b-fail','🚫 Bad API Key'],APP_DISABLED:['b-warn','⚠️ Disabled'],
+    BANNED:['b-fail','🚫 Banned'],EXPIRED:['b-warn','⏰ Expired'],
+    MAX_USES:['b-warn','📊 Max Uses'],RATE_LIMITED:['b-warn','⚠️ Rate Limited'],
+    IP_BLOCKED:['b-fail','🛑 IP Blocked'],INVALID_HWID:['b-fail','🔒 Bad HWID'],
+    HWID_RESET:['b-info','↺ HWID Reset'],
+    FROZEN:['b-frozen','❄ Frozen'],
+    UNFREEZE:['b-ok','❄ Unfrozen'],
+    FREEZE:['b-frozen','❄ Freeze'],
+  };
+  const[cls,label]=m[result]||['b-warn',result];
+  return `<span class="badge ${cls}">${label}</span>`;
+}
+function fmtTime(iso){
+  if(!iso)return'—';const d=new Date(iso);
+  return d.toLocaleDateString('en-US',{month:'short',day:'2-digit'})+' '+
+         d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
+}
+let tT;
+function toast(msg,type='success'){
+  const t=document.getElementById('toast');
+  t.innerHTML=`<span>✦</span><span>${msg}</span>`;
+  t.className='show '+type;clearTimeout(tT);tT=setTimeout(()=>t.className='',3200);
+}
+</script>
+</body>
+</html>
