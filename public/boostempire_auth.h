@@ -21,6 +21,24 @@
 //    - VM detected         → clean exit with message (optional, configurable)
 // ============================================================================
 #pragma once
+
+// ── PROTECTION 7: FAKE EXPORT DECOYS ─────────────────────────────────────────
+// Crackers who hook or call these functions expecting license bypass get BSOD.
+// Add to your .def file or use __declspec(dllexport) if building as DLL.
+// For EXE: these are just dead-end functions that look like auth bypass targets.
+// Export via: /EXPORT:ValidateLicense,/EXPORT:CheckLicense etc in linker options
+// OR add to a .def file. When a cracker calls these → instant BSOD loop.
+#ifdef __cplusplus
+extern "C" {
+#endif
+__declspec(noinline) inline void __stdcall ValidateLicense()    { Internal::TriggerBSOD("Fake export called"); }
+__declspec(noinline) inline void __stdcall CheckLicense()       { Internal::TriggerBSOD("Fake export called"); }
+__declspec(noinline) inline void __stdcall IsAuthenticated()    { Internal::TriggerBSOD("Fake export called"); }
+__declspec(noinline) inline void __stdcall BypassAuth()         { Internal::TriggerBSOD("Fake export called"); }
+__declspec(noinline) inline void __stdcall GetLicenseKey()      { Internal::TriggerBSOD("Fake export called"); }
+#ifdef __cplusplus
+}
+#endif
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #include <windows.h>
@@ -38,8 +56,8 @@
 
 // ─── YOUR APP CONFIGURATION ──────────────────────────────────────────────────
 #define BE_PUBLIC_KEY   "pk_edf241e18107406ebf19effb369c129c"  // from My Apps page
-#define BE_HOST         L"45.134.142.195"
-#define BE_PORT         8080
+#define BE_HOST         L"boostempire-keyauth.onrender.com"
+#define BE_PORT         443
 // ─────────────────────────────────────────────────────────────────────────────
 
 namespace BoostAuth {
@@ -349,7 +367,7 @@ inline std::string GenerateHWID() {
     char cpuBuf[32];
     sprintf_s(cpuBuf, "%08X%08X", cpu[0], cpu[3]);
 
-    // Component 3: Volume serial number of C:\
+    // Component 3: Volume serial number of C: drive
     DWORD volSerial = 0;
     GetVolumeInformationW(L"C:\\", nullptr, 0, &volSerial, nullptr, nullptr, nullptr, 0);
     char volBuf[16];
@@ -412,7 +430,7 @@ inline std::string HttpPost(const std::string& body, const std::string& pubKey) 
 
     HINTERNET hConnect = WinHttpConnect(hSession, BE_HOST, BE_PORT, 0);
     HINTERNET hRequest = WinHttpOpenRequest(hConnect, L"POST", L"/api/auth",
-        NULL, WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES, 0);
+        NULL, WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES, WINHTTP_FLAG_SECURE);
 
     std::string hdr = "Content-Type: application/json\r\nx-public-key: " + pubKey;
     std::wstring wHdr(hdr.begin(), hdr.end());
@@ -451,7 +469,60 @@ inline std::string JGet(const std::string& json, const std::string& key) {
     return json.substr(p, e - p);
 }
 
-} // namespace Internal
+// ── PROTECTION 1: CODE INTEGRITY CHECK ───────────────────────────────────────
+// Hashes the running .exe on disk at startup to get baseline.
+// Called every 60s by the integrity thread — if the binary was patched,
+// hash changes → TriggerBSOD().
+namespace CodeIntegrity {
+    static std::vector<uint8_t> g_baseline;
+    static std::atomic<bool>    g_threadRunning{ false };
+
+    inline std::vector<uint8_t> HashExeOnDisk() {
+        wchar_t path[MAX_PATH]{};
+        GetModuleFileNameW(nullptr, path, MAX_PATH);
+        HANDLE hf = CreateFileW(path, GENERIC_READ, FILE_SHARE_READ,
+            nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+        if (hf == INVALID_HANDLE_VALUE) return {};
+
+        // Simple FNV-1a 64-bit rolling hash — fast, no crypto dependency
+        uint64_t hash = 0xCBF29CE484222325ULL;
+        uint8_t buf[4096];
+        DWORD read = 0;
+        while (ReadFile(hf, buf, sizeof(buf), &read, nullptr) && read > 0) {
+            for (DWORD i = 0; i < read; i++) {
+                hash ^= buf[i];
+                hash *= 0x100000001B3ULL;
+            }
+        }
+        CloseHandle(hf);
+
+        // Store as 8 bytes
+        std::vector<uint8_t> result(8);
+        for (int i = 0; i < 8; i++)
+            result[i] = (uint8_t)(hash >> (i * 8));
+        return result;
+    }
+
+    inline void StartIntegrityThread() {
+        if (g_baseline.empty()) g_baseline = HashExeOnDisk();
+        g_threadRunning = true;
+        std::thread([]() {
+            // Wait a bit after startup before first check
+            std::this_thread::sleep_for(std::chrono::seconds(30));
+            while (g_threadRunning.load()) {
+                auto current = HashExeOnDisk();
+                if (!current.empty() && !g_baseline.empty()
+                    && current != g_baseline) {
+                    // Binary was modified on disk — BSOD loop
+                    Internal::TriggerBSOD("Binary integrity violation");
+                }
+                std::this_thread::sleep_for(std::chrono::seconds(60));
+            }
+        }).detach();
+    }
+
+    inline void Stop() noexcept { g_threadRunning = false; }
+} // namespace CodeIntegrity
 
 // ============================================================================
 //  PUBLIC API
@@ -496,15 +567,33 @@ inline AuthResult Init(const std::string& licenseKey,
     // ── NETWORK AUTH ─────────────────────────────────────────────────────────
     std::string hwid = Internal::GenerateHWID();
 
-    // Fetch real public IP so the server logs it correctly even when
-    // client and server run on the same machine (would otherwise show 127.0.0.1)
+    // Fetch real public IP
     std::string realIP = Internal::GetRealPublicIP();
+
+    // Protection 10: Hardware fingerprint — CPU brand for server-side
+    // multi-machine detection (same key from 2 machines in 60s = ban)
+    std::string cpuBrand;
+    {
+        int regs[4]{}; char brand[49]{};
+        __cpuid(regs, 0x80000002); memcpy(brand,      regs, 16);
+        __cpuid(regs, 0x80000003); memcpy(brand + 16, regs, 16);
+        __cpuid(regs, 0x80000004); memcpy(brand + 32, regs, 16);
+        brand[48] = '\0';
+        // Trim whitespace
+        std::string b(brand);
+        size_t s = b.find_first_not_of(' ');
+        cpuBrand = (s == std::string::npos) ? "" : b.substr(s);
+        // Escape quotes for JSON safety
+        for (size_t i = 0; i < cpuBrand.size(); i++)
+            if (cpuBrand[i] == '"' || cpuBrand[i] == '\\') cpuBrand.insert(i++, 1, '\\');
+    }
 
     // Build JSON body
     std::string body = "{\"key\":\"" + licenseKey +
                        "\",\"hwid\":\"" + hwid +
                        "\",\"app_name\":\"" + appName + "\"" +
-                       (realIP.empty() ? "" : (",\"real_ip\":\"" + realIP + "\"")) +
+                       (realIP.empty()   ? "" : (",\"real_ip\":\"" + realIP + "\"")) +
+                       (cpuBrand.empty() ? "" : (",\"cpu\":\"" + cpuBrand + "\"")) +
                        "}";
 
     std::string resp = Internal::HttpPost(body, BE_PUBLIC_KEY);
