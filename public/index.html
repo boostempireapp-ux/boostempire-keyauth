@@ -1152,226 +1152,188 @@ Body: { <span class="cs">"key"</span>:<span class="cs">"BE-XXX"</span>, <span cl
         </div>
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:860px">
+      <!-- ROW 1: Password + System Info -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;max-width:900px">
 
-        <!-- LEFT COLUMN -->
-        <div style="display:flex;flex-direction:column;gap:14px">
-
-          <!-- CHANGE PASSWORD -->
-          <div class="card">
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
-              <div style="width:32px;height:32px;background:var(--pdim);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px">🔐</div>
-              <div>
-                <div style="font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;color:var(--p3);letter-spacing:1px;text-transform:uppercase">Change Password</div>
-                <div style="font-size:10px;color:var(--text3);margin-top:1px">Update your admin panel password</div>
-              </div>
+        <!-- CHANGE PASSWORD -->
+        <div class="card">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+            <div style="width:32px;height:32px;background:var(--pdim);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px">🔐</div>
+            <div>
+              <div style="font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;color:var(--p3);letter-spacing:1px;text-transform:uppercase">Change Password</div>
+              <div style="font-size:10px;color:var(--text3);margin-top:1px">Update your admin panel password</div>
             </div>
-            <div class="fg" style="margin-bottom:10px"><label>New Password (min 6 chars)</label><input class="inp" type="password" id="np1" placeholder="New password…"/></div>
-            <div class="fg" style="margin-bottom:14px"><label>Confirm Password</label><input class="inp" type="password" id="np2" placeholder="Confirm password…"/></div>
-            <button class="btn btn-primary" onclick="changePw()">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-              Update Password
-            </button>
+          </div>
+          <div class="fg" style="margin-bottom:10px"><label>New Password (min 6 chars)</label><input class="inp" type="password" id="np1" placeholder="New password…"/></div>
+          <div class="fg" style="margin-bottom:14px"><label>Confirm Password</label><input class="inp" type="password" id="np2" placeholder="Confirm password…"/></div>
+          <button class="btn btn-primary" onclick="changePw()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Update Password
+          </button>
+        </div>
+
+        <!-- SYSTEM INFO -->
+        <div class="card">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+            <div style="width:32px;height:32px;background:var(--pdim);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px">ℹ️</div>
+            <div>
+              <div style="font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;color:var(--p3);letter-spacing:1px;text-transform:uppercase">System Info</div>
+              <div style="font-size:10px;color:var(--text3);margin-top:1px">Current server configuration</div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div class="settings-row" style="padding:9px 14px"><span style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Version</span><span class="kc" style="font-size:11px">v4.0</span></div>
+            <div class="settings-row" style="padding:9px 14px"><span style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Server</span><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--p3)">boostempire-keyauth.onrender.com</span></div>
+            <div class="settings-row" style="padding:9px 14px"><span style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Database</span><span style="font-size:11px;color:var(--text2)">NeDB (local flat-file)</span></div>
+            <div class="settings-row" style="padding:9px 14px"><span style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Status</span><div style="display:flex;align-items:center;gap:6px"><div style="width:6px;height:6px;border-radius:50%;background:var(--p);box-shadow:0 0 6px var(--p);animation:blink 2s infinite"></div><span style="font-size:11px;color:var(--p3)">Online</span></div></div>
+            <div class="settings-row" style="padding:9px 14px"><span style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Sessions</span><span style="font-size:11px;color:var(--text2)">In-memory (per restart)</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ROW 2: Security Grid (2x8 card grid) -->
+      <div class="card" style="max-width:900px;margin-bottom:16px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px">
+          <div style="width:32px;height:32px;background:var(--pdim);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px">🛡️</div>
+          <div>
+            <div style="font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;color:var(--p3);letter-spacing:1px;text-transform:uppercase">Security Features</div>
+            <div style="font-size:10px;color:var(--text3);margin-top:1px">16 active protection layers — C++ client + server</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
+
+          <div style="background:rgba(139,92,246,0.06);border:1px solid rgba(139,92,246,0.15);border-radius:10px;padding:13px;display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:11px;font-weight:700;color:var(--p3)">① Code Integrity</span><span class="badge b-active" style="font-size:9px">60s</span></div>
+            <div style="font-size:9px;color:var(--text3);line-height:1.5">Hashes .exe at startup + every 60s — patched binary triggers BSOD loop</div>
+            <div style="font-size:9px;color:var(--text3);margin-top:auto"><span style="color:var(--p)">●</span> C++ Client</div>
           </div>
 
-          <!-- SECURITY TOGGLES -->
-          <div class="card">
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
-              <div style="width:32px;height:32px;background:var(--pdim);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px">🛡️</div>
-              <div>
-                <div style="font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;color:var(--p3);letter-spacing:1px;text-transform:uppercase">Security Features</div>
-                <div style="font-size:10px;color:var(--text3);margin-top:1px">16 active protection layers — C++ client + server</div>
-              </div>
+          <div style="background:rgba(139,92,246,0.06);border:1px solid rgba(139,92,246,0.15);border-radius:10px;padding:13px;display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:11px;font-weight:700;color:var(--p3)">② Import Obfuscation</span><span class="badge b-active" style="font-size:9px">Active</span></div>
+            <div style="font-size:9px;color:var(--text3);line-height:1.5">WinAPI resolved dynamically — invisible to IDA/Ghidra static analysis</div>
+            <div style="font-size:9px;color:var(--text3);margin-top:auto"><span style="color:var(--p)">●</span> C++ Client</div>
+          </div>
+
+          <div style="background:rgba(139,92,246,0.06);border:1px solid rgba(139,92,246,0.15);border-radius:10px;padding:13px;display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:11px;font-weight:700;color:var(--p3)">③ Anti-Dump</span><span class="badge b-active" style="font-size:9px">Active</span></div>
+            <div style="font-size:9px;color:var(--text3);line-height:1.5">PE header erased from memory at startup — dumped files are broken</div>
+            <div style="font-size:9px;color:var(--text3);margin-top:auto"><span style="color:var(--p)">●</span> C++ Client</div>
+          </div>
+
+          <div style="background:rgba(139,92,246,0.06);border:1px solid rgba(139,92,246,0.15);border-radius:10px;padding:13px;display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:11px;font-weight:700;color:var(--p3)">④ Timing Jitter</span><span class="badge b-info" style="font-size:9px">Server</span></div>
+            <div style="font-size:9px;color:var(--text3);line-height:1.5">80–350ms random delay per auth — blocks automated key-testing scripts</div>
+            <div style="font-size:9px;color:var(--text3);margin-top:auto"><span style="color:#c4b5fd">●</span> Server-side</div>
+          </div>
+
+          <div style="background:rgba(139,92,246,0.06);border:1px solid rgba(139,92,246,0.15);border-radius:10px;padding:13px;display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:11px;font-weight:700;color:var(--p3)">⑤ Stack Canary</span><span class="badge b-active" style="font-size:9px">Active</span></div>
+            <div style="font-size:9px;color:var(--text3);line-height:1.5">Random sentinel on auth stack — catches ROP attacks and stack smashing</div>
+            <div style="font-size:9px;color:var(--text3);margin-top:auto"><span style="color:var(--p)">●</span> C++ Client</div>
+          </div>
+
+          <div style="background:rgba(139,92,246,0.06);border:1px solid rgba(139,92,246,0.15);border-radius:10px;padding:13px;display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:11px;font-weight:700;color:var(--p3)">⑥ Thread Anomaly</span><span class="badge b-active" style="font-size:9px">Active</span></div>
+            <div style="font-size:9px;color:var(--text3);line-height:1.5">Baseline set at startup — DLL injection causes thread spike → BSOD</div>
+            <div style="font-size:9px;color:var(--text3);margin-top:auto"><span style="color:var(--p)">●</span> C++ Client</div>
+          </div>
+
+          <div style="background:rgba(139,92,246,0.06);border:1px solid rgba(139,92,246,0.15);border-radius:10px;padding:13px;display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:11px;font-weight:700;color:var(--p3)">⑦ Fake Exports</span><span class="badge b-active" style="font-size:9px">5 Decoys</span></div>
+            <div style="font-size:9px;color:var(--text3);line-height:1.5">ValidateLicense, CheckLicense, IsAuthenticated exports → instant BSOD</div>
+            <div style="font-size:9px;color:var(--text3);margin-top:auto"><span style="color:var(--p)">●</span> C++ Client</div>
+          </div>
+
+          <div style="background:rgba(139,92,246,0.06);border:1px solid rgba(139,92,246,0.15);border-radius:10px;padding:13px;display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:11px;font-weight:700;color:var(--p3)">⑧ Anti-Screenshot</span><span class="badge b-active" style="font-size:9px">Active</span></div>
+            <div style="font-size:9px;color:var(--text3);line-height:1.5">Window excluded from OBS, capture tools, screenshots — shows black</div>
+            <div style="font-size:9px;color:var(--text3);margin-top:auto"><span style="color:var(--p)">●</span> C++ Client</div>
+          </div>
+
+          <div style="background:rgba(139,92,246,0.06);border:1px solid rgba(139,92,246,0.15);border-radius:10px;padding:13px;display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:11px;font-weight:700;color:var(--p3)">⑨ Watchdog Guard</span><span class="badge b-active" style="font-size:9px">15s</span></div>
+            <div style="font-size:9px;color:var(--text3);line-height:1.5">Detects watchdog suspended/killed by cracker — BSOD within 15s</div>
+            <div style="font-size:9px;color:var(--text3);margin-top:auto"><span style="color:var(--p)">●</span> C++ Client</div>
+          </div>
+
+          <div style="background:rgba(139,92,246,0.06);border:1px solid rgba(139,92,246,0.15);border-radius:10px;padding:13px;display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:11px;font-weight:700;color:var(--p3)">⑩ Multi-Machine</span><span class="badge b-info" style="font-size:9px">Server</span></div>
+            <div style="font-size:9px;color:var(--text3);line-height:1.5">Same key from 2 different CPUs within 60s → permanent ban</div>
+            <div style="font-size:9px;color:var(--text3);margin-top:auto"><span style="color:#c4b5fd">●</span> Server-side</div>
+          </div>
+
+          <div style="background:rgba(139,92,246,0.06);border:1px solid rgba(139,92,246,0.15);border-radius:10px;padding:13px;display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:11px;font-weight:700;color:var(--p3)">BSOD Loop</span><span class="badge b-active" style="font-size:9px">Active</span></div>
+            <div style="font-size:9px;color:var(--text3);line-height:1.5">Cracker detected → registry persist → BSOD on every reboot forever</div>
+            <div style="font-size:9px;color:var(--text3);margin-top:auto"><span style="color:var(--p)">●</span> C++ Client</div>
+          </div>
+
+          <div style="background:rgba(139,92,246,0.06);border:1px solid rgba(139,92,246,0.15);border-radius:10px;padding:13px;display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:11px;font-weight:700;color:var(--p3)">Anti-Debug</span><span class="badge b-active" style="font-size:9px">7 Layers</span></div>
+            <div style="font-size:9px;color:var(--text3);line-height:1.5">PEB, NtQuery, RDTSC timing, HW breakpoints, heap flags, remote debugger</div>
+            <div style="font-size:9px;color:var(--text3);margin-top:auto"><span style="color:var(--p)">●</span> C++ Client</div>
+          </div>
+
+          <div style="background:rgba(139,92,246,0.06);border:1px solid rgba(139,92,246,0.15);border-radius:10px;padding:13px;display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:11px;font-weight:700;color:var(--p3)">Process Blacklist</span><span class="badge b-active" style="font-size:9px">15+ Tools</span></div>
+            <div style="font-size:9px;color:var(--text3);line-height:1.5">x64dbg, IDA, CheatEngine, dnSpy, Ghidra, WireShark, Fiddler, PE-Bear…</div>
+            <div style="font-size:9px;color:var(--text3);margin-top:auto"><span style="color:var(--p)">●</span> C++ Client</div>
+          </div>
+
+          <div style="background:rgba(139,92,246,0.06);border:1px solid rgba(139,92,246,0.15);border-radius:10px;padding:13px;display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:11px;font-weight:700;color:var(--p3)">Anti-VM</span><span class="badge b-active" style="font-size:9px">5 Layers</span></div>
+            <div style="font-size:9px;color:var(--text3);line-height:1.5">VMware, VirtualBox, QEMU, KVM, Hyper-V via CPUID + registry checks</div>
+            <div style="font-size:9px;color:var(--text3);margin-top:auto"><span style="color:var(--p)">●</span> C++ Client</div>
+          </div>
+
+          <div style="background:rgba(139,92,246,0.06);border:1px solid rgba(139,92,246,0.15);border-radius:10px;padding:13px;display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:11px;font-weight:700;color:var(--p3)">Rate Limiting</span><span class="badge b-info" style="font-size:9px">Server</span></div>
+            <div style="font-size:9px;color:var(--text3);line-height:1.5">30 req/min per IP — auto-block after 80 failed auths permanently</div>
+            <div style="font-size:9px;color:var(--text3);margin-top:auto"><span style="color:#c4b5fd">●</span> Server-side</div>
+          </div>
+
+          <div style="background:rgba(139,92,246,0.06);border:1px solid rgba(139,92,246,0.15);border-radius:10px;padding:13px;display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:11px;font-weight:700;color:var(--p3)">HWID Lock</span><span class="badge b-info" style="font-size:9px">Server</span></div>
+            <div style="font-size:9px;color:var(--text3);line-height:1.5">Key locks to first machine — hardware ID stored as SHA-256 hash</div>
+            <div style="font-size:9px;color:var(--text3);margin-top:auto"><span style="color:#c4b5fd">●</span> Server-side</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ROW 3: Danger Zone + About -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:900px">
+
+        <!-- DANGER ZONE -->
+        <div class="card" style="border-color:rgba(109,40,217,0.3)">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+            <div style="width:32px;height:32px;background:rgba(109,40,217,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px">⚠️</div>
+            <div>
+              <div style="font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;color:#9333ea;letter-spacing:1px;text-transform:uppercase">Danger Zone</div>
+              <div style="font-size:10px;color:var(--text3);margin-top:1px">Destructive actions — use with care</div>
             </div>
-            <div class="settings-row">
-              <div class="settings-row-left">
-                <div class="settings-row-title">① Code Integrity Check</div>
-                <div class="settings-row-desc">Hashes .exe at startup + every 60s — patched binary → BSOD loop</div>
-              </div>
-              <span class="badge b-active">60s</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div class="settings-row" style="border-color:rgba(109,40,217,0.2)">
+              <div class="settings-row-left"><div class="settings-row-title">Clear All Logs</div><div class="settings-row-desc">Permanently delete all auth log entries</div></div>
+              <button class="btn btn-danger btn-sm" onclick="clearLogs()">Clear Logs</button>
             </div>
-            <div class="settings-row">
-              <div class="settings-row-left">
-                <div class="settings-row-title">② Import Obfuscation</div>
-                <div class="settings-row-desc">WinAPI calls resolved dynamically — invisible to IDA/Ghidra static analysis</div>
-              </div>
-              <span class="badge b-active">Active</span>
-            </div>
-            <div class="settings-row">
-              <div class="settings-row-left">
-                <div class="settings-row-title">③ Anti-Dump</div>
-                <div class="settings-row-desc">PE header erased from memory at startup — dumped files are broken</div>
-              </div>
-              <span class="badge b-active">Active</span>
-            </div>
-            <div class="settings-row">
-              <div class="settings-row-left">
-                <div class="settings-row-title">④ Auth Timing Jitter</div>
-                <div class="settings-row-desc">80–350ms random delay per auth — blocks brute-force key testing scripts</div>
-              </div>
-              <span class="badge b-active">Server</span>
-            </div>
-            <div class="settings-row">
-              <div class="settings-row-left">
-                <div class="settings-row-title">⑤ Stack Canary</div>
-                <div class="settings-row-desc">Random sentinel on auth stack — catches stack smashing and ROP attacks</div>
-              </div>
-              <span class="badge b-active">Active</span>
-            </div>
-            <div class="settings-row">
-              <div class="settings-row-left">
-                <div class="settings-row-title">⑥ Thread Count Anomaly</div>
-                <div class="settings-row-desc">Baseline set at startup — DLL injection causes thread spike → BSOD</div>
-              </div>
-              <span class="badge b-active">Active</span>
-            </div>
-            <div class="settings-row">
-              <div class="settings-row-left">
-                <div class="settings-row-title">⑦ Fake Export Decoys</div>
-                <div class="settings-row-desc">ValidateLicense, CheckLicense, IsAuthenticated exports → instant BSOD</div>
-              </div>
-              <span class="badge b-active">5 decoys</span>
-            </div>
-            <div class="settings-row">
-              <div class="settings-row-left">
-                <div class="settings-row-title">⑧ Anti-Screenshot</div>
-                <div class="settings-row-desc">Window excluded from OBS, capture tools, screenshots — shows black</div>
-              </div>
-              <span class="badge b-active">Active</span>
-            </div>
-            <div class="settings-row">
-              <div class="settings-row-left">
-                <div class="settings-row-title">⑨ Watchdog Self-Integrity</div>
-                <div class="settings-row-desc">Detects watchdog thread suspended/killed by cracker — triggers BSOD</div>
-              </div>
-              <span class="badge b-active">15s</span>
-            </div>
-            <div class="settings-row">
-              <div class="settings-row-left">
-                <div class="settings-row-title">⑩ Multi-Machine Detection</div>
-                <div class="settings-row-desc">Same key from 2 different CPUs within 60s → permanent ban</div>
-              </div>
-              <span class="badge b-active">Server</span>
-            </div>
-            <div class="settings-row">
-              <div class="settings-row-left">
-                <div class="settings-row-title">BSOD Loop + Registry Persist</div>
-                <div class="settings-row-desc">Cracker detected → registry written → BSOD on every reboot forever</div>
-              </div>
-              <span class="badge b-active">Active</span>
-            </div>
-            <div class="settings-row">
-              <div class="settings-row-left">
-                <div class="settings-row-title">Anti-Debug (7 methods)</div>
-                <div class="settings-row-desc">IsDebuggerPresent, PEB, NtQuery, RDTSC, HW breakpoints, heap flags, remote</div>
-              </div>
-              <span class="badge b-active">7 layers</span>
-            </div>
-            <div class="settings-row">
-              <div class="settings-row-left">
-                <div class="settings-row-title">Process Blacklist</div>
-                <div class="settings-row-desc">x64dbg, IDA, CheatEngine, dnSpy, Ghidra, WireShark, Fiddler, PE-Bear…</div>
-              </div>
-              <span class="badge b-active">15+ tools</span>
-            </div>
-            <div class="settings-row">
-              <div class="settings-row-left">
-                <div class="settings-row-title">Anti-VM Detection</div>
-                <div class="settings-row-desc">VMware, VirtualBox, QEMU, KVM, Hyper-V — CPUID + registry checks</div>
-              </div>
-              <span class="badge b-active">5 layers</span>
-            </div>
-            <div class="settings-row">
-              <div class="settings-row-left">
-                <div class="settings-row-title">Rate Limiting + Auto Block</div>
-                <div class="settings-row-desc">30 req/min per IP — permanent block after 80 failed auths</div>
-              </div>
-              <span class="badge b-active">30/min</span>
-            </div>
-            <div class="settings-row">
-              <div class="settings-row-left">
-                <div class="settings-row-title">HWID Lock + SHA-256</div>
-                <div class="settings-row-desc">Key locks to first machine — hardware ID stored as SHA-256 hash</div>
-              </div>
-              <span class="badge b-active">Active</span>
+            <div class="settings-row" style="border-color:rgba(109,40,217,0.2)">
+              <div class="settings-row-left"><div class="settings-row-title">Unblock All IPs</div><div class="settings-row-desc">Remove all IP blocks from the blocklist</div></div>
+              <button class="btn btn-danger btn-sm" onclick="unblockAllIPs()">Unblock All</button>
             </div>
           </div>
         </div>
 
-        <!-- RIGHT COLUMN -->
-        <div style="display:flex;flex-direction:column;gap:14px">
-
-          <!-- SYSTEM INFO -->
-          <div class="card">
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
-              <div style="width:32px;height:32px;background:var(--pdim);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px">ℹ️</div>
-              <div>
-                <div style="font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;color:var(--p3);letter-spacing:1px;text-transform:uppercase">System Info</div>
-                <div style="font-size:10px;color:var(--text3);margin-top:1px">Current server configuration</div>
-              </div>
-            </div>
-            <div style="display:flex;flex-direction:column;gap:6px">
-              <div class="settings-row" style="padding:10px 14px">
-                <span style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Version</span>
-                <span class="kc" style="font-size:11px">v4.0</span>
-              </div>
-              <div class="settings-row" style="padding:10px 14px">
-                <span style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Server</span>
-                <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--p3)">boostempire.auth:8080</span>
-              </div>
-              <div class="settings-row" style="padding:10px 14px">
-                <span style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Database</span>
-                <span style="font-size:11px;color:var(--text2)">NeDB (local flat-file)</span>
-              </div>
-              <div class="settings-row" style="padding:10px 14px">
-                <span style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Status</span>
-                <div style="display:flex;align-items:center;gap:6px">
-                  <div style="width:6px;height:6px;border-radius:50%;background:var(--p);box-shadow:0 0 6px var(--p);animation:blink 2s infinite"></div>
-                  <span style="font-size:11px;color:var(--p3)">Online</span>
-                </div>
-              </div>
-              <div class="settings-row" style="padding:10px 14px">
-                <span style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Sessions</span>
-                <span style="font-size:11px;color:var(--text2)">In-memory (per restart)</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- DANGER ZONE -->
-          <div class="card" style="border-color:rgba(109,40,217,0.3)">
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
-              <div style="width:32px;height:32px;background:rgba(109,40,217,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px">⚠️</div>
-              <div>
-                <div style="font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;color:#9333ea;letter-spacing:1px;text-transform:uppercase">Danger Zone</div>
-                <div style="font-size:10px;color:var(--text3);margin-top:1px">Destructive actions — use with care</div>
-              </div>
-            </div>
-            <div style="display:flex;flex-direction:column;gap:8px">
-              <div class="settings-row" style="border-color:rgba(109,40,217,0.2)">
-                <div class="settings-row-left">
-                  <div class="settings-row-title">Clear All Logs</div>
-                  <div class="settings-row-desc">Permanently delete all auth log entries</div>
-                </div>
-                <button class="btn btn-danger btn-sm" onclick="clearLogs()">Clear Logs</button>
-              </div>
-              <div class="settings-row" style="border-color:rgba(109,40,217,0.2)">
-                <div class="settings-row-left">
-                  <div class="settings-row-title">Unblock All IPs</div>
-                  <div class="settings-row-desc">Remove all IP blocks from the blocklist</div>
-                </div>
-                <button class="btn btn-danger btn-sm" onclick="unblockAllIPs()">Unblock All</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- ABOUT -->
-          <div class="card" style="background:linear-gradient(135deg,rgba(139,92,246,0.06) 0%,rgba(0,0,0,0) 100%)">
-            <div style="text-align:center;padding:8px 0">
-              <div style="font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;letter-spacing:3px;background:linear-gradient(135deg,#c4b5fd,#8b5cf6,#6d28d9);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">BOOSTEMPIRE</div>
-              <div style="font-size:9px;letter-spacing:3px;color:var(--text3);margin-top:3px;text-transform:uppercase">KeyAuth System v4.0</div>
-              <div style="margin-top:12px;font-size:11px;color:var(--text3);line-height:1.8">
-                Self-hosted license authentication<br/>with C++ anti-crack protection
-              </div>
+        <!-- ABOUT -->
+        <div class="card" style="background:linear-gradient(135deg,rgba(139,92,246,0.06) 0%,rgba(0,0,0,0) 100%);display:flex;flex-direction:column;justify-content:center">
+          <div style="text-align:center;padding:8px 0">
+            <div style="font-family:'Rajdhani',sans-serif;font-size:24px;font-weight:700;letter-spacing:3px;background:linear-gradient(135deg,#c4b5fd,#8b5cf6,#6d28d9);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">BOOSTEMPIRE</div>
+            <div style="font-size:9px;letter-spacing:3px;color:var(--text3);margin-top:3px;text-transform:uppercase">KeyAuth System v4.0</div>
+            <div style="margin-top:14px;font-size:11px;color:var(--text3);line-height:1.8">Self-hosted license authentication<br/>with C++ anti-crack protection</div>
+            <div style="margin-top:14px;display:flex;justify-content:center;gap:8px">
+              <span class="badge b-active">16 Protections</span>
+              <span class="badge b-info">Server Online</span>
             </div>
           </div>
         </div>
