@@ -1119,7 +1119,26 @@ Body: { <span class="cs">"key"</span>:<span class="cs">"BE-XXX"</span>, <span cl
 <span class="cv">MAX_USES</span>          — used too many times
 <span class="cv">HWID_MISMATCH</span>     — wrong machine
 <span class="cv">RATE_LIMITED</span>      — too many requests
-<span class="cv">IP_BLOCKED</span>        — IP permanently blocked</div>
+<span class="cv">IP_BLOCKED</span>        — IP permanently blocked
+
+<span class="cm">// Request body fields</span>
+<span class="cv">key</span>       — license key (required)
+<span class="cv">hwid</span>      — hardware ID from GenerateHWID() (required)
+<span class="cv">app_name</span>  — your app name (required)
+<span class="cv">real_ip</span>   — client public IP from GetRealPublicIP() (optional)
+<span class="cv">cpu</span>       — CPU brand for multi-machine detection (optional)
+
+<span class="cm">// C++ Protections in boostempire_auth.h</span>
+<span class="cv">�  Code Integrity</span>   — hashes exe, checks every 60s, patch = BSOD
+<span class="cv">② Import Obfuscation</span>— dynamic API resolution, hidden from static analysis
+<span class="cv">③ Anti-Dump</span>        — PE header erased from memory at startup
+<span class="cv">④ Timing Jitter</span>    — 80-350ms server delay per auth, blocks brute-force
+<span class="cv">⑤ Stack Canary</span>     — ROP/smash detection on auth stack
+<span class="cv">⑥ Thread Anomaly</span>   — DLL injection = thread spike = BSOD
+<span class="cv">⑦ Fake Exports</span>     — ValidateLicense/CheckLicense/IsAuthenticated = BSOD
+<span class="cv">⑧ Anti-Screenshot</span>  — WDA_EXCLUDEFROMCAPTURE, black in OBS/capture
+<span class="cv">⑨ Watchdog Check</span>   — watchdog suspended = BSOD within 15s
+<span class="cv">⑩ Multi-Machine</span>    — same key 2 CPUs in 60s = permanent ban</div>
         </div>
       </div>
     </div>
@@ -1161,50 +1180,120 @@ Body: { <span class="cs">"key"</span>:<span class="cs">"BE-XXX"</span>, <span cl
               <div style="width:32px;height:32px;background:var(--pdim);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px">🛡️</div>
               <div>
                 <div style="font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;color:var(--p3);letter-spacing:1px;text-transform:uppercase">Security Features</div>
-                <div style="font-size:10px;color:var(--text3);margin-top:1px">Active protection layers (read-only)</div>
+                <div style="font-size:10px;color:var(--text3);margin-top:1px">16 active protection layers — C++ client + server</div>
               </div>
             </div>
             <div class="settings-row">
               <div class="settings-row-left">
-                <div class="settings-row-title">Rate Limiting</div>
-                <div class="settings-row-desc">Max 30 requests per minute per IP</div>
+                <div class="settings-row-title">① Code Integrity Check</div>
+                <div class="settings-row-desc">Hashes .exe at startup + every 60s — patched binary → BSOD loop</div>
               </div>
-              <span class="badge b-active">30 req/min</span>
+              <span class="badge b-active">60s</span>
             </div>
             <div class="settings-row">
               <div class="settings-row-left">
-                <div class="settings-row-title">Auto IP Block</div>
-                <div class="settings-row-desc">Permanently block after 80 failed auths</div>
-              </div>
-              <span class="badge b-active">80 fails</span>
-            </div>
-            <div class="settings-row">
-              <div class="settings-row-left">
-                <div class="settings-row-title">HWID Hashing</div>
-                <div class="settings-row-desc">Hardware IDs stored as SHA-256 hash</div>
-              </div>
-              <span class="badge b-active">SHA-256</span>
-            </div>
-            <div class="settings-row">
-              <div class="settings-row-left">
-                <div class="settings-row-title">BSOD Anti-Crack (C++)</div>
-                <div class="settings-row-desc">Triggers system crash on debugger/cracker</div>
+                <div class="settings-row-title">② Import Obfuscation</div>
+                <div class="settings-row-desc">WinAPI calls resolved dynamically — invisible to IDA/Ghidra static analysis</div>
               </div>
               <span class="badge b-active">Active</span>
             </div>
             <div class="settings-row">
               <div class="settings-row-left">
+                <div class="settings-row-title">③ Anti-Dump</div>
+                <div class="settings-row-desc">PE header erased from memory at startup — dumped files are broken</div>
+              </div>
+              <span class="badge b-active">Active</span>
+            </div>
+            <div class="settings-row">
+              <div class="settings-row-left">
+                <div class="settings-row-title">④ Auth Timing Jitter</div>
+                <div class="settings-row-desc">80–350ms random delay per auth — blocks brute-force key testing scripts</div>
+              </div>
+              <span class="badge b-active">Server</span>
+            </div>
+            <div class="settings-row">
+              <div class="settings-row-left">
+                <div class="settings-row-title">⑤ Stack Canary</div>
+                <div class="settings-row-desc">Random sentinel on auth stack — catches stack smashing and ROP attacks</div>
+              </div>
+              <span class="badge b-active">Active</span>
+            </div>
+            <div class="settings-row">
+              <div class="settings-row-left">
+                <div class="settings-row-title">⑥ Thread Count Anomaly</div>
+                <div class="settings-row-desc">Baseline set at startup — DLL injection causes thread spike → BSOD</div>
+              </div>
+              <span class="badge b-active">Active</span>
+            </div>
+            <div class="settings-row">
+              <div class="settings-row-left">
+                <div class="settings-row-title">⑦ Fake Export Decoys</div>
+                <div class="settings-row-desc">ValidateLicense, CheckLicense, IsAuthenticated exports → instant BSOD</div>
+              </div>
+              <span class="badge b-active">5 decoys</span>
+            </div>
+            <div class="settings-row">
+              <div class="settings-row-left">
+                <div class="settings-row-title">⑧ Anti-Screenshot</div>
+                <div class="settings-row-desc">Window excluded from OBS, capture tools, screenshots — shows black</div>
+              </div>
+              <span class="badge b-active">Active</span>
+            </div>
+            <div class="settings-row">
+              <div class="settings-row-left">
+                <div class="settings-row-title">⑨ Watchdog Self-Integrity</div>
+                <div class="settings-row-desc">Detects watchdog thread suspended/killed by cracker — triggers BSOD</div>
+              </div>
+              <span class="badge b-active">15s</span>
+            </div>
+            <div class="settings-row">
+              <div class="settings-row-left">
+                <div class="settings-row-title">⑩ Multi-Machine Detection</div>
+                <div class="settings-row-desc">Same key from 2 different CPUs within 60s → permanent ban</div>
+              </div>
+              <span class="badge b-active">Server</span>
+            </div>
+            <div class="settings-row">
+              <div class="settings-row-left">
+                <div class="settings-row-title">BSOD Loop + Registry Persist</div>
+                <div class="settings-row-desc">Cracker detected → registry written → BSOD on every reboot forever</div>
+              </div>
+              <span class="badge b-active">Active</span>
+            </div>
+            <div class="settings-row">
+              <div class="settings-row-left">
+                <div class="settings-row-title">Anti-Debug (7 methods)</div>
+                <div class="settings-row-desc">IsDebuggerPresent, PEB, NtQuery, RDTSC, HW breakpoints, heap flags, remote</div>
+              </div>
+              <span class="badge b-active">7 layers</span>
+            </div>
+            <div class="settings-row">
+              <div class="settings-row-left">
+                <div class="settings-row-title">Process Blacklist</div>
+                <div class="settings-row-desc">x64dbg, IDA, CheatEngine, dnSpy, Ghidra, WireShark, Fiddler, PE-Bear…</div>
+              </div>
+              <span class="badge b-active">15+ tools</span>
+            </div>
+            <div class="settings-row">
+              <div class="settings-row-left">
                 <div class="settings-row-title">Anti-VM Detection</div>
-                <div class="settings-row-desc">Detects VMware, VirtualBox, QEMU, KVM</div>
+                <div class="settings-row-desc">VMware, VirtualBox, QEMU, KVM, Hyper-V — CPUID + registry checks</div>
               </div>
               <span class="badge b-active">5 layers</span>
             </div>
             <div class="settings-row">
               <div class="settings-row-left">
-                <div class="settings-row-title">Process Blacklist</div>
-                <div class="settings-row-desc">x64dbg, IDA, CheatEngine, dnSpy, Ghidra…</div>
+                <div class="settings-row-title">Rate Limiting + Auto Block</div>
+                <div class="settings-row-desc">30 req/min per IP — permanent block after 80 failed auths</div>
               </div>
-              <span class="badge b-active">30+ tools</span>
+              <span class="badge b-active">30/min</span>
+            </div>
+            <div class="settings-row">
+              <div class="settings-row-left">
+                <div class="settings-row-title">HWID Lock + SHA-256</div>
+                <div class="settings-row-desc">Key locks to first machine — hardware ID stored as SHA-256 hash</div>
+              </div>
+              <span class="badge b-active">Active</span>
             </div>
           </div>
         </div>
