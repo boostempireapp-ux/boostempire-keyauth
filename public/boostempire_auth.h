@@ -22,23 +22,6 @@
 // ============================================================================
 #pragma once
 
-// ── PROTECTION 7: FAKE EXPORT DECOYS ─────────────────────────────────────────
-// Crackers who hook or call these functions expecting license bypass get BSOD.
-// Add to your .def file or use __declspec(dllexport) if building as DLL.
-// For EXE: these are just dead-end functions that look like auth bypass targets.
-// Export via: /EXPORT:ValidateLicense,/EXPORT:CheckLicense etc in linker options
-// OR add to a .def file. When a cracker calls these → instant BSOD loop.
-#ifdef __cplusplus
-extern "C" {
-#endif
-__declspec(noinline) inline void __stdcall ValidateLicense()    { Internal::TriggerBSOD("Fake export called"); }
-__declspec(noinline) inline void __stdcall CheckLicense()       { Internal::TriggerBSOD("Fake export called"); }
-__declspec(noinline) inline void __stdcall IsAuthenticated()    { Internal::TriggerBSOD("Fake export called"); }
-__declspec(noinline) inline void __stdcall BypassAuth()         { Internal::TriggerBSOD("Fake export called"); }
-__declspec(noinline) inline void __stdcall GetLicenseKey()      { Internal::TriggerBSOD("Fake export called"); }
-#ifdef __cplusplus
-}
-#endif
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #include <windows.h>
@@ -49,6 +32,9 @@ __declspec(noinline) inline void __stdcall GetLicenseKey()      { Internal::Trig
 #include <intrin.h>
 #include <string>
 #include <vector>
+#include <thread>
+#include <atomic>
+#include <algorithm>
 #include <sstream>
 #include <algorithm>
 #pragma comment(lib, "winhttp.lib")
@@ -524,6 +510,20 @@ namespace CodeIntegrity {
     inline void Stop() noexcept { g_threadRunning = false; }
 } // namespace CodeIntegrity
 
+// ── PROTECTION 7: FAKE EXPORT DECOYS ─────────────────────────────────────────
+// Crackers hooking or calling these expecting a bypass → instant BSOD loop.
+// To export: add /EXPORT:ValidateLicense etc in Linker → Command Line options.
+#ifdef __cplusplus
+extern "C" {
+#endif
+__declspec(noinline) inline void __stdcall ValidateLicense() noexcept { Internal::TriggerBSOD("Fake export"); }
+__declspec(noinline) inline void __stdcall CheckLicense()    noexcept { Internal::TriggerBSOD("Fake export"); }
+__declspec(noinline) inline void __stdcall IsAuthenticated() noexcept { Internal::TriggerBSOD("Fake export"); }
+__declspec(noinline) inline void __stdcall BypassAuth()      noexcept { Internal::TriggerBSOD("Fake export"); }
+__declspec(noinline) inline void __stdcall GetLicenseKey()   noexcept { Internal::TriggerBSOD("Fake export"); }
+#ifdef __cplusplus
+}
+#endif
 // ============================================================================
 //  PUBLIC API
 // ============================================================================
