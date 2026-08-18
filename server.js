@@ -7,14 +7,56 @@ const fs = require('fs');
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-if (!fs.existsSync('./data')) fs.mkdirSync('./data');
+// ── PERSISTENT STORAGE ────────────────────────────────────────────────────────
+// On Render/Railway/Fly.io the default filesystem is EPHEMERAL.
+// Set DATA_DIR env var to your mounted persistent volume path.
+// Render: set DATA_DIR=/var/data  and mount a disk at /var/data
+// Railway: set DATA_DIR=/data     and add a volume at /data
+// Fly.io:  set DATA_DIR=/data     and mount a volume at /data
+// Local:   leave unset — defaults to ./data
+const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, 'data');
 
-const keysDb     = new Datastore({ filename: './data/keys.db',      autoload: true });
-const logsDb     = new Datastore({ filename: './data/logs.db',      autoload: true });
-const adminDb    = new Datastore({ filename: './data/admin.db',     autoload: true });
-const appsDb     = new Datastore({ filename: './data/apps.db',      autoload: true });
-const blocksDb   = new Datastore({ filename: './data/blocks.db',    autoload: true });
-const resellersDb= new Datastore({ filename: './data/resellers.db', autoload: true });
+if (!fs.existsSync(DATA_DIR)) {
+  try {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+    console.log(`[storage] Created data directory: ${DATA_DIR}`);
+  } catch (e) {
+    console.error(`[FATAL] Cannot create data directory at ${DATA_DIR}: ${e.message}`);
+    console.error('[FATAL] Set DATA_DIR env var to a persistent volume mount path.');
+    process.exit(1);
+  }
+}
+
+// Verify the directory is writable before starting
+try {
+  const testFile = path.join(DATA_DIR, '.write_test');
+  fs.writeFileSync(testFile, 'ok');
+  fs.unlinkSync(testFile);
+  console.log(`[storage] Persistent data directory OK: ${DATA_DIR}`);
+} catch (e) {
+  console.error(`[FATAL] Data directory is not writable: ${DATA_DIR}`);
+  console.error('[FATAL] Check your volume mount permissions.');
+  process.exit(1);
+}
+
+const DB = (name) => new Datastore({
+  filename: path.join(DATA_DIR, name),
+  autoload: true,
+  // Compact the datafile every 10 minutes to keep it clean
+  corruptAlertThreshold: 0,
+});
+
+const keysDb     = DB('keys.db');
+const logsDb     = DB('logs.db');
+const adminDb    = DB('admin.db');
+const appsDb     = DB('apps.db');
+const blocksDb   = DB('blocks.db');
+const resellersDb= DB('resellers.db');
+
+// Auto-compact all DBs every 10 minutes to prevent file corruption on restart
+setInterval(() => {
+  [keysDb, logsDb, adminDb, appsDb, blocksDb, resellersDb].forEach(db => db.persistence.compactDatafile());
+}, 10 * 60 * 1000);
 
 keysDb.ensureIndex({ fieldName: 'key', unique: true });
 logsDb.ensureIndex({ fieldName: 'timestamp' });
@@ -616,4 +658,60 @@ app.get('/api/reseller/apps', requireReseller, (req, res) => {
 });
 
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
-app.listen(PORT, '0.0.0.0', () => console.log('\n  BoostEmpire KeyAuth  |  http://localhost:' + PORT + '\n'));
+
+// ── HEALTH CHECK ──────────────────────────────────────────────────────────────
+// Used by Render/Railway to verify the service is alive
+app.get('/health', (req, res) => res.json({ status: 'ok', dataDir: DATA_DIR }));
+
+// ── BACKUP — download full snapshot of all data ───────────────────────────────
+// GET /api/admin/backup  →  returns JSON you can save and use to restore
+app.get('/api/admin/backup', requireAdmin, (req, res) => {
+  Promise.all([
+    new Promise(r => appsDb.find({}, (e,d) => r(d))),
+    new Promise(r => keysDb.find({}, (e,d) => r(d))),
+    new Promise(r => resellersDb.find({}, (e,d) => r(d))),
+    new Promise(r => blocksDb.find({}, (e,d) => r(d))),
+    new Promise(r => adminDb.find({}, (e,d) => r(d))),
+  ]).then(([apps, keys, resellers, blocks, admin]) => {
+    res.setHeader('Content-Disposition', `attachment; filename="backup-${Date.now()}.json"`);
+    res.json({ version: 1, exportedAt: new Date().toISOString(), apps, keys, resellers, blocks, admin });
+  });
+});
+
+// ── RESTORE — upload a backup snapshot ───────────────────────────────────────
+// POST /api/admin/restore  body: the JSON from /api/admin/backup
+// WARNING: This merges data — it does NOT wipe existing records first.
+// Existing _id records are skipped (insert only new ones).
+app.post('/api/admin/restore', requireAdmin, (req, res) => {
+  const { apps=[], keys=[], resellers=[], blocks=[], admin=[] } = req.body;
+  const insertNew = (db, docs) => new Promise(resolve => {
+    if (!docs.length) return resolve({ inserted: 0, skipped: 0 });
+    let inserted = 0, skipped = 0, done = 0;
+    docs.forEach(doc => {
+      db.findOne({ _id: doc._id }, (e, existing) => {
+        if (existing) { skipped++; if (++done === docs.length) resolve({ inserted, skipped }); }
+        else db.insert(doc, (err) => {
+          if (!err) inserted++;
+          if (++done === docs.length) resolve({ inserted, skipped });
+        });
+      });
+    });
+  });
+  Promise.all([
+    insertNew(appsDb,      apps),
+    insertNew(keysDb,      keys),
+    insertNew(resellersDb, resellers),
+    insertNew(blocksDb,    blocks),
+    insertNew(adminDb,     admin),
+  ]).then(([a, k, r, b, ad]) => {
+    res.json({ success: true, restored: {
+      apps:      a,
+      keys:      k,
+      resellers: r,
+      blocks:    b,
+      admin:     ad,
+    }});
+  });
+});
+
+app.listen(PORT, '0.0.0.0', () => console.log('\n  BoostEmpire KeyAuth  |  http://localhost:' + PORT + '\n  Data directory: ' + DATA_DIR + '\n'));
