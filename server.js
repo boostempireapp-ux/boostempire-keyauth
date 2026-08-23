@@ -113,6 +113,30 @@ async function trackFail(ip) {
   }
 }
 
+// ── REPLAY PROTECTION (nonce + timestamp) ────────────────────────────────────
+const nonceCache  = new Map(); // nonce → expiry ms
+const NONCE_TTL   = 5 * 60 * 1000;           // 5 min replay window
+const TS_SKEW_MAX = 5 * 60 * 1000;           // max ±5 min clock skew
+
+setInterval(() => {
+  const now = Date.now();
+  for (const [k, exp] of nonceCache) { if (now > exp) nonceCache.delete(k); }
+}, 60_000);
+
+// ── PER-KEY MISMATCH ABUSE TRACKER ───────────────────────────────────────────
+const keyMismatch = new Map(); // key → { count, window_start }
+const MISMATCH_FREEZE_AT = 8;          // freeze key after 8 mismatches
+const MISMATCH_WINDOW    = 10 * 60 * 1000; // within a 10-min window
+
+function trackKeyMismatch(key) {
+  const now  = Date.now();
+  const rec  = keyMismatch.get(key) || { count: 0, windowStart: now };
+  if (now - rec.windowStart > MISMATCH_WINDOW) { rec.count = 1; rec.windowStart = now; }
+  else rec.count++;
+  keyMismatch.set(key, rec);
+  return rec.count;
+}
+
 // ── AUTH MIDDLEWARE ───────────────────────────────────────────────────────────
 async function requireAdmin(req, res, next) {
   const token = req.headers['x-admin-token'] || req.query.token;
@@ -174,8 +198,42 @@ app.post('/api/auth', rateLimit, async (req, res) => {
     return res.json({ success:false, code:'NO_KEY', message:'Missing or invalid license key' });
   if (!hwid||typeof hwid!=='string'||hwid.length>200)
     return res.json({ success:false, code:'NO_HWID', message:'Missing or invalid HWID' });
-  if (hwid.length<8 || /^(0+|1+|test|fake|crack|bypass|debug|cheat)$/i.test(hwid)) {
+  // ── Timestamp replay guard ─────────────────────────────────────────────────
+  const clientTs = parseInt(req.headers['x-timestamp'] || req.body.ts || '0', 10);
+  if (clientTs) {
+    const skew = Math.abs(Date.now() - clientTs);
+    if (skew > TS_SKEW_MAX) {
+      log(null,key,hwid,app_name,'AUTH','REPLAY_REJECTED',ip,`Timestamp skew ${skew}ms`);
+      await trackFail(ip);
+      return res.json({ success:false, code:'REPLAY_REJECTED', message:'Request timestamp expired — check your clock' });
+    }
+  }
+
+  // ── Nonce dedup guard ──────────────────────────────────────────────────────
+  const nonce = req.headers['x-request-id'] || req.body.nonce;
+  if (nonce && typeof nonce === 'string' && nonce.length >= 8 && nonce.length <= 128) {
+    if (nonceCache.has(nonce)) {
+      log(null,key,hwid,app_name,'AUTH','REPLAY_REJECTED',ip,'Duplicate nonce');
+      await trackFail(ip);
+      return res.json({ success:false, code:'REPLAY_REJECTED', message:'Duplicate request detected' });
+    }
+    nonceCache.set(nonce, Date.now() + NONCE_TTL);
+  }
+
+  // ── Enhanced HWID pattern check ────────────────────────────────────────────
+  const SUSPICIOUS_HWID = /^(0+|1+|f+|a+|deadbeef|cafebabe|test|fake|crack|bypass|debug|cheat|null|none|unknown|demo|trial|free|hacked|patch|inject|hook|dump|unpack|reverse|frida|ida64|x64dbg|olly|ce|cheatengine)/i;
+  const HEX_ENTROPY_MIN = 12; // a real HWID should have varied chars
+
+  if (hwid.length < 8 || SUSPICIOUS_HWID.test(hwid.toLowerCase())) {
     log(null,key,hwid,app_name,'AUTH','INVALID_HWID',ip,'Suspicious HWID pattern rejected');
+    await trackFail(ip);
+    return res.json({ success:false, code:'INVALID_HWID', message:'Invalid hardware ID' });
+  }
+
+  // Entropy check — reject low-entropy HWIDs (all same character / near-zero variation)
+  const uniqueChars = new Set(hwid.replace(/-/g,'')).size;
+  if (uniqueChars < 4) {
+    log(null,key,hwid,app_name,'AUTH','INVALID_HWID',ip,'Low-entropy HWID rejected');
     await trackFail(ip);
     return res.json({ success:false, code:'INVALID_HWID', message:'Invalid hardware ID' });
   }
@@ -204,7 +262,20 @@ app.post('/api/auth', rateLimit, async (req, res) => {
 
   const hwidHash = hashString(hwid+String(appDoc._id));
   if (doc.hwid) {
-    if (!safeCompare(doc.hwid, hwidHash)) { await trackFail(ip); log(appDoc._id,key,hwid,app_name||appDoc.name,'AUTH','HWID_MISMATCH',ip); return res.json({ success:false, code:'HWID_MISMATCH', message:'HWID mismatch — please contact support' }); }
+    if (!safeCompare(doc.hwid, hwidHash)) {
+      await trackFail(ip);
+      // Per-key abuse tracking — auto-freeze after repeated mismatches
+      const mismatchCount = trackKeyMismatch(key);
+      const details = `Attempted HWID: ${hwid} | Mismatch #${mismatchCount}`;
+      log(appDoc._id,key,hwid,app_name||appDoc.name,'AUTH','HWID_MISMATCH',ip,details);
+      if (mismatchCount >= MISMATCH_FREEZE_AT && doc.status === 'active') {
+        await keysCol.updateOne({ key }, { $set:{ status:'frozen' } });
+        activeSessions.delete(key);
+        log(appDoc._id,key,hwid,app_name||appDoc.name,'AUTH','AUTO_FROZEN',ip,`Auto-frozen after ${mismatchCount} HWID mismatches`);
+        keyMismatch.delete(key);
+      }
+      return res.json({ success:false, code:'HWID_MISMATCH', message:'HWID mismatch — please contact support' });
+    }
   } else {
     await keysCol.updateOne({ key }, { $set:{ hwid:hwidHash, hwidRaw:hwid } });
     log(appDoc._id,key,hwid,app_name||appDoc.name,'AUTH','HWID_BOUND',ip,'HWID locked');
@@ -353,6 +424,23 @@ app.get('/api/admin/stats', requireAdmin, async (req, res) => {
   ]);
   res.json({ success:true, stats:{ total,active,banned,used,recentAuths,hwidBlocks,totalApps,blockedIPs,totalResellers } });
 });
+// ── ADMIN: HWID MISMATCHES ─────────────────────────────────────────────────────
+app.get('/api/admin/hwid-mismatches', requireAdmin, async (req, res) => {
+  const mismatches = await logsCol.find({ result:'HWID_MISMATCH' }).sort({ timestamp:-1 }).limit(400).toArray();
+  // Enrich each record with current key status + bound HWID
+  const enriched = await Promise.all(mismatches.map(async l => {
+    const keyDoc = await keysCol.findOne({ key: l.key });
+    return {
+      ...l,
+      keyStatus : keyDoc ? keyDoc.status  : 'deleted',
+      keyLabel  : keyDoc ? (keyDoc.label  || '')      : '',
+      hwidBound : keyDoc ? (keyDoc.hwidRaw || '')     : '',
+      appName   : l.app_name || 'Unknown',
+    };
+  }));
+  res.json({ success:true, mismatches:enriched });
+});
+
 app.post('/api/admin/login', async (req, res) => {
   const doc = await adminCol.findOne({ _id:'admin' });
   if (doc && safeCompare(req.body.password, doc.password)) res.json({ success:true, token:doc.password });
