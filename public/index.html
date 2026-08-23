@@ -417,6 +417,38 @@ tbody td{padding:9px 13px;vertical-align:middle;}
 .b-gold::before{background:#f59e0b;}
 .b-suspended{background:rgba(239,68,68,0.1);color:#fca5a5;border:1px solid rgba(239,68,68,0.2);}
 .b-suspended::before{background:#ef4444;}
+/* HWID MISMATCHES */
+.b-mismatch{background:rgba(220,38,38,0.1);color:#f87171;border:1px solid rgba(220,38,38,0.3);}
+.b-mismatch::before{background:#dc2626;box-shadow:0 0 4px #dc2626;}
+.hwid-mismatch-row{border-left:3px solid rgba(220,38,38,0.35);}
+.hwid-mismatch-row:hover{background:rgba(220,38,38,0.04) !important;}
+/* RESELLER REDESIGN */
+.rs-hero{background:linear-gradient(135deg,rgba(245,158,11,0.12) 0%,rgba(0,0,0,0) 60%),rgba(8,8,8,0.95);border:1px solid rgba(245,158,11,0.25);border-radius:16px;padding:22px 26px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;position:relative;overflow:hidden;}
+.rs-hero::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),transparent);}
+.rs-hero-name{font-family:'Rajdhani',sans-serif;font-size:28px;font-weight:700;background:linear-gradient(135deg,#fbbf24,#f59e0b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;}
+.rs-hero-sub{font-size:11px;color:var(--text3);margin-top:4px;letter-spacing:.5px;}
+.rs-hero-tag{background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.28);border-radius:10px;padding:10px 16px;text-align:center;}
+.rs-hero-tag-val{font-family:'Rajdhani',sans-serif;font-size:26px;font-weight:700;color:var(--gold);line-height:1;}
+.rs-hero-tag-label{font-size:9px;color:rgba(245,158,11,0.6);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.rs-stat{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:18px 16px;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s;}
+.rs-stat:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(245,158,11,0.08);}
+.rs-stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.rs-stat.s-gold::before{background:linear-gradient(90deg,#f59e0b,transparent);}
+.rs-stat-icon{width:34px;height:34px;border-radius:10px;background:rgba(245,158,11,0.1);display:flex;align-items:center;justify-content:center;margin-bottom:12px;color:var(--gold);}
+.rs-stat-val{font-family:'Rajdhani',sans-serif;font-size:32px;font-weight:700;line-height:1;color:var(--gold);margin-bottom:3px;}
+.rs-stat-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-weight:600;}
+.rs-perm-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.rs-perm-item{display:flex;align-items:center;gap:8px;padding:8px 11px;border-radius:8px;border:1px solid;}
+.rs-perm-item.granted{background:rgba(245,158,11,0.07);border-color:rgba(245,158,11,0.2);}
+.rs-perm-item.denied{background:rgba(74,74,122,0.06);border-color:rgba(74,74,122,0.12);}
+.rs-perm-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.rs-perm-item.granted .rs-perm-dot{background:#f59e0b;box-shadow:0 0 5px rgba(245,158,11,0.5);}
+.rs-perm-item.denied .rs-perm-dot{background:var(--text3);}
+.rs-perm-text{font-size:11px;font-weight:500;}
+.rs-perm-item.granted .rs-perm-text{color:rgba(245,158,11,0.9);}
+.rs-perm-item.denied .rs-perm-text{color:var(--text3);}
+.rs-notice{padding:10px 14px;background:rgba(245,158,11,0.05);border:1px solid rgba(245,158,11,0.15);border-left:3px solid var(--gold);border-radius:8px;font-size:11px;color:rgba(245,158,11,0.7);line-height:1.6;margin-top:12px;}
+
 .notice{padding:10px 14px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:8px;font-size:11px;color:#d97706;margin-bottom:14px;line-height:1.7;}
 .nav-item.r-item{color:var(--gold);}
 .nav-item.r-item:hover{color:#fbbf24;background:rgba(245,158,11,0.06);}
@@ -497,6 +529,11 @@ tbody td{padding:9px 13px;vertical-align:middle;}
         <span class="nav-badge" id="block-badge"></span>
       </div>
 
+      <div class="nav-item" data-page="hwid-mismatches" onclick="go('hwid-mismatches')" style="color:#f87171">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><line x1="12" y1="15" x2="12" y2="17" stroke-linecap="round"/></svg>
+        <span style="color:#f87171">HWID Mismatches</span>
+        <span class="nav-badge" id="hwid-badge" style="background:#dc2626;display:none"></span>
+      </div>
       <div class="nav-sec" style="color:rgba(245,158,11,0.5)">Resellers</div>
       <div class="nav-item" data-page="resellers" onclick="go('resellers')" style="color:var(--gold)">
         <svg viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -1022,6 +1059,73 @@ tbody td{padding:9px 13px;vertical-align:middle;}
       </div>
     </div>
 
+    <!-- HWID MISMATCHES -->
+    <div class="page" id="page-hwid-mismatches">
+      <div class="ph">
+        <div>
+          <div class="pt" style="color:#f87171">HWID <span style="color:#dc2626">Mismatches</span></div>
+          <div style="font-size:11px;color:var(--text3);margin-top:3px">Users trying to authenticate from a different machine than the key is locked to. Key auto-freezes after 8 mismatches in 10 min.</div>
+        </div>
+        <div class="pa">
+          <button class="btn btn-ghost btn-sm" onclick="loadHwidMismatches()">&#8635; Refresh</button>
+          <span id="hwid-mismatch-count" style="color:var(--text3);font-size:11px"></span>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px">
+        <div style="background:rgba(220,38,38,0.07);border:1px solid rgba(220,38,38,0.2);border-radius:12px;padding:16px 14px;position:relative;overflow:hidden">
+          <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#dc2626,transparent)"></div>
+          <div style="font-family:'Rajdhani',sans-serif;font-size:28px;font-weight:700;color:#f87171" id="hm-total">0</div>
+          <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px">Total Events</div>
+        </div>
+        <div style="background:rgba(220,38,38,0.07);border:1px solid rgba(220,38,38,0.2);border-radius:12px;padding:16px 14px;position:relative;overflow:hidden">
+          <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#dc2626,transparent)"></div>
+          <div style="font-family:'Rajdhani',sans-serif;font-size:28px;font-weight:700;color:#f87171" id="hm-unique-keys">0</div>
+          <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px">Unique Keys</div>
+        </div>
+        <div style="background:rgba(59,130,246,0.07);border:1px solid rgba(59,130,246,0.2);border-radius:12px;padding:16px 14px;position:relative;overflow:hidden">
+          <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#3b82f6,transparent)"></div>
+          <div style="font-family:'Rajdhani',sans-serif;font-size:28px;font-weight:700;color:#93c5fd" id="hm-auto-frozen">0</div>
+          <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px">Frozen Keys</div>
+        </div>
+        <div style="background:rgba(139,92,246,0.06);border:1px solid var(--border);border-radius:12px;padding:16px 14px;position:relative;overflow:hidden">
+          <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--p),transparent)"></div>
+          <div style="font-family:'Rajdhani',sans-serif;font-size:28px;font-weight:700;color:var(--p3)" id="hm-unique-ips">0</div>
+          <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px">Unique IPs</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+        <div class="sw">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input class="search" id="hm-search" placeholder="Filter key, IP, HWID, label..." oninput="filterHwidMismatches()"/>
+        </div>
+        <select class="sel-filter" id="hm-status-filter" onchange="filterHwidMismatches()" style="width:145px">
+          <option value="">All Key Status</option>
+          <option value="active">Active</option>
+          <option value="frozen">Frozen</option>
+          <option value="banned">Banned</option>
+          <option value="deleted">Deleted</option>
+        </select>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;border-color:rgba(220,38,38,0.15)">
+        <div style="padding:12px 18px;border-bottom:1px solid rgba(220,38,38,0.1);display:flex;align-items:center;gap:8px">
+          <div style="width:8px;height:8px;border-radius:50%;background:#dc2626;box-shadow:0 0 6px #dc2626;animation:blink 1.5s infinite"></div>
+          <span style="font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;color:#f87171;text-transform:uppercase">Mismatch Events</span>
+          <span style="margin-left:auto;font-size:10px;color:var(--text3)">Keys auto-freeze after 8 mismatches in 10 min</span>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr>
+              <th>Timestamp</th><th>License Key</th><th>App</th><th>Key Status</th>
+              <th>Attempted HWID</th><th>Bound HWID</th><th>IP</th><th>Label</th><th>Action</th>
+            </tr></thead>
+            <tbody id="hwid-mismatches-body">
+              <tr><td colspan="9"><div class="empty"><div class="empty-icon" style="opacity:.3">&#128274;</div><div class="empty-text">Loading...</div></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
     <!-- SDK -->
     <div class="page" id="page-sdk">
       <div class="ph"><div class="pt">SDK &amp; <span>Integration</span></div></div>
@@ -1219,7 +1323,7 @@ Body: { <span class="cs">"key"</span>:<span class="cs">"BE-XXX"</span>, <span cl
 <span class="cv">cpu</span>       — CPU brand for multi-machine detection (optional)
 
 <span class="cm">// C++ Protections in boostempire_auth.h</span>
-<span class="cv">�  Code Integrity</span>   — hashes exe, checks every 60s, patch = BSOD
+<span class="cv">   Code Integrity</span>   — hashes exe, checks every 60s, patch = BSOD
 <span class="cv">② Import Obfuscation</span>— dynamic API resolution, hidden from static analysis
 <span class="cv">③ Anti-Dump</span>        — PE header erased from memory at startup
 <span class="cv">④ Timing Jitter</span>    — 80-350ms server delay per auth, blocks brute-force
@@ -1441,36 +1545,84 @@ Body: { <span class="cs">"key"</span>:<span class="cs">"BE-XXX"</span>, <span cl
 
     <!-- RESELLER DASHBOARD -->
     <div class="page" id="page-r-dashboard">
-      <div class="rh-bar">
-        <div><div class="rh-name" id="r-display-name">Reseller Panel</div><div style="font-size:11px;color:var(--text3);margin-top:3px">Your personalized dashboard</div></div>
-        <div class="rh-tag">Reseller Account</div>
+      <div class="rs-hero">
+        <div style="display:flex;align-items:center;gap:16px">
+          <div style="width:50px;height:50px;background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.3);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">&#x1F511;</div>
+          <div>
+            <div class="rs-hero-name" id="r-display-name">Reseller Portal</div>
+            <div class="rs-hero-sub">Reseller Account &middot; BoostEmpire KeyAuth</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="rs-hero-tag"><div class="rs-hero-tag-val" id="rs-slots-left">&#x221E;</div><div class="rs-hero-tag-label">Slots Left</div></div>
+          <div class="rs-hero-tag"><div class="rs-hero-tag-val" id="rs-total-2">0</div><div class="rs-hero-tag-label">Total Keys</div></div>
+        </div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
-        <div class="dash-stat sa"><div class="ds-val" id="rs-total">0</div><div class="ds-label">My Keys</div><div class="ds-bar"><div class="ds-bar-fill" style="width:100%"></div></div></div>
-        <div class="dash-stat sb2"><div class="ds-val" id="rs-active">0</div><div class="ds-label">Active</div><div class="ds-bar"><div class="ds-bar-fill" id="rs-active-bar" style="width:0%"></div></div></div>
-        <div class="dash-stat sc"><div class="ds-val" id="rs-banned">0</div><div class="ds-label">Banned</div><div class="ds-bar"><div class="ds-bar-fill" style="width:0%"></div></div></div>
-        <div class="dash-stat sf" style="--da:#f59e0b">
-          <div class="ds-val" id="rs-quota" style="color:#f59e0b">∞</div>
-          <div class="ds-label">Key Quota</div>
-          <div class="quota-bar"><div class="quota-fill" id="rs-quota-fill" style="width:0%"></div></div>
+        <div class="rs-stat s-gold">
+          <div class="rs-stat-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg></div>
+          <div class="rs-stat-val" id="rs-total">0</div><div class="rs-stat-label">My Keys</div>
+          <div style="height:2px;background:rgba(245,158,11,0.08);border-radius:2px;margin-top:8px;overflow:hidden"><div style="height:100%;background:var(--gold);border-radius:2px;width:100%"></div></div>
+        </div>
+        <div class="rs-stat s-gold">
+          <div class="rs-stat-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="rs-stat-val" id="rs-active">0</div><div class="rs-stat-label">Active</div>
+          <div style="height:2px;background:rgba(245,158,11,0.08);border-radius:2px;margin-top:8px;overflow:hidden"><div id="rs-active-bar" style="height:100%;background:var(--gold);border-radius:2px;width:0%"></div></div>
+        </div>
+        <div class="rs-stat" style="border-color:rgba(109,40,217,0.2)">
+          <div style="width:34px;height:34px;border-radius:10px;background:rgba(109,40,217,0.1);display:flex;align-items:center;justify-content:center;margin-bottom:12px;color:#9333ea">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg></div>
+          <div style="font-family:'Rajdhani',sans-serif;font-size:32px;font-weight:700;color:#9333ea;margin-bottom:3px" id="rs-banned">0</div>
+          <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-weight:600">Banned</div>
+          <div style="height:2px;background:rgba(109,40,217,0.08);border-radius:2px;margin-top:8px;overflow:hidden"><div id="rs-banned-bar" style="height:100%;background:#9333ea;border-radius:2px;width:0%"></div></div>
+        </div>
+        <div class="rs-stat" style="border-color:rgba(245,158,11,0.2)">
+          <div class="rs-stat-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
+          <div class="rs-stat-val" id="rs-quota" style="font-size:26px">&#x221E;</div><div class="rs-stat-label">Quota Used</div>
+          <div class="quota-bar" style="margin-top:8px"><div class="quota-fill" id="rs-quota-fill" style="width:0%"></div></div>
           <div style="font-size:9px;color:var(--text3);margin-top:4px" id="rs-quota-label"></div>
         </div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-        <div class="card" style="padding:0">
-          <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
-            <span class="card-title">Recent Activity</span>
-            <button class="btn btn-ghost btn-sm" onclick="go('r-logs')" id="r-view-logs-btn" style="display:none;font-size:11px">View All →</button>
+      <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:16px">
+        <div class="card" style="padding:0;border-color:rgba(245,158,11,0.15)">
+          <div style="padding:14px 18px;border-bottom:1px solid rgba(245,158,11,0.1);display:flex;align-items:center;justify-content:space-between">
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="width:26px;height:26px;background:rgba(245,158,11,0.12);border-radius:7px;display:flex;align-items:center;justify-content:center">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              </div>
+              <span style="font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;color:var(--gold);text-transform:uppercase">Recent Activity</span>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="go('r-logs')" id="r-view-logs-btn" style="display:none;font-size:11px;border-color:rgba(245,158,11,0.2);color:var(--gold)">View All &#x2192;</button>
           </div>
-          <div id="r-dash-activity"><div style="text-align:center;padding:36px;color:var(--text3);font-size:12px">No activity yet</div></div>
+          <div id="r-dash-activity" style="padding:4px 0"><div style="text-align:center;padding:36px;color:var(--text3);font-size:12px">No activity yet</div></div>
         </div>
-        <div class="card" style="padding:16px 18px">
-          <div class="card-title" style="margin-bottom:14px">🛡️ Your Permissions</div>
-          <div id="r-permissions-display" style="display:grid;grid-template-columns:1fr 1fr;gap:6px"></div>
-          <div style="margin-top:12px;padding:10px 13px;background:#000;border-radius:8px;font-size:11px;color:var(--text3)">Contact your admin to request additional access.</div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="card" style="padding:18px;border-color:rgba(245,158,11,0.15)">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+              <div style="width:26px;height:26px;background:rgba(245,158,11,0.12);border-radius:7px;display:flex;align-items:center;justify-content:center">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              </div>
+              <span style="font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;color:var(--gold);text-transform:uppercase">Your Access</span>
+            </div>
+            <div class="rs-perm-grid" id="r-permissions-display"></div>
+            <div class="rs-notice">Need more access? Contact your admin.</div>
+          </div>
+          <div class="card" style="padding:18px;border-color:rgba(245,158,11,0.15)">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+              <div style="width:26px;height:26px;background:rgba(245,158,11,0.12);border-radius:7px;display:flex;align-items:center;justify-content:center">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              </div>
+              <span style="font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;color:var(--gold);text-transform:uppercase">Quick Actions</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:7px">
+              <button class="btn btn-ghost btn-sm" style="width:100%;justify-content:flex-start;gap:9px;border-color:rgba(245,158,11,0.18);color:var(--gold)" onclick="go('r-generate')" id="r-qa-generate"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Generate New Keys</button>
+              <button class="btn btn-ghost btn-sm" style="width:100%;justify-content:flex-start;gap:9px" onclick="go('r-keys')" id="r-qa-keys"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778"/></svg>View My Keys</button>
+              <button class="btn btn-ghost btn-sm" style="width:100%;justify-content:flex-start;gap:9px" onclick="go('r-logs')" id="r-qa-logs"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Auth Logs</button>
+              <button class="btn btn-ghost btn-sm" style="width:100%;justify-content:flex-start;gap:9px" onclick="logout()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sign Out</button>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
 
     <!-- RESELLER: MY KEYS -->
     <div class="page" id="page-r-keys">
@@ -1630,7 +1782,7 @@ function go(page){
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
   document.querySelectorAll('.nav-item').forEach(n=>{if(n.dataset.page===page)n.classList.add('active');});
-  const pageActions={dashboard:loadDashboard,apps:loadApps,keys:loadKeys,logs:loadLogs,blocks:loadBlocks,resellers:loadResellers,'r-dashboard':loadResellerDashboard,'r-keys':loadResellerKeys,'r-generate':loadResellerGeneratePage,'r-logs':loadResellerLogs,'r-blocks':loadResellerBlocks};
+  const pageActions={dashboard:loadDashboard,apps:loadApps,keys:loadKeys,logs:loadLogs,blocks:loadBlocks,resellers:loadResellers,'hwid-mismatches':loadHwidMismatches,'r-dashboard':loadResellerDashboard,'r-keys':loadResellerKeys,'r-generate':loadResellerGeneratePage,'r-logs':loadResellerLogs,'r-blocks':loadResellerBlocks};
   if(pageActions[page]) pageActions[page]();
 }
 
@@ -2022,6 +2174,119 @@ async function unblockIP(ip){
   if(r.success){toast(`${ip} unblocked`,'success');loadBlocks();}
 }
 
+
+// ══════════════ HWID MISMATCHES ══════════════
+let allHwidMismatches = [];
+
+async function loadHwidMismatches() {
+  document.getElementById('hwid-mismatches-body').innerHTML =
+    '<tr><td colspan="9"><div class="empty"><div class="empty-icon" style="opacity:.3">loading</div><div class="empty-text">Loading...</div></div></td></tr>';
+  const r = await get('/api/admin/hwid-mismatches');
+  if (!r.success) return;
+  allHwidMismatches = r.mismatches;
+  const total      = r.mismatches.length;
+  const uniqueKeys = new Set(r.mismatches.map(m => m.key)).size;
+  const uniqueIPs  = new Set(r.mismatches.map(m => m.ip).filter(Boolean)).size;
+  const autoFrozen = r.mismatches.filter(m => m.keyStatus === 'frozen').length;
+  anim('hm-total', total); anim('hm-unique-keys', uniqueKeys);
+  anim('hm-auto-frozen', autoFrozen); anim('hm-unique-ips', uniqueIPs);
+  const badge = document.getElementById('hwid-badge');
+  if (total > 0) { badge.textContent = total > 99 ? '99+' : total; badge.style.display = 'inline'; }
+  else badge.style.display = 'none';
+  document.getElementById('hwid-mismatch-count').textContent = total + ' events';
+  filterHwidMismatches();
+}
+
+function filterHwidMismatches() {
+  const q  = document.getElementById('hm-search').value.toLowerCase();
+  const sf = document.getElementById('hm-status-filter').value;
+  let list = allHwidMismatches;
+  if (sf) list = list.filter(m => m.keyStatus === sf);
+  if (q)  list = list.filter(m =>
+    (m.key||'').toLowerCase().includes(q) ||
+    (m.ip||'').includes(q) ||
+    (m.hwid||'').toLowerCase().includes(q) ||
+    (m.keyLabel||'').toLowerCase().includes(q)
+  );
+  renderHwidMismatches(list);
+}
+
+function renderHwidMismatches(list) {
+  const tb = document.getElementById('hwid-mismatches-body');
+  if (!list.length) {
+    tb.innerHTML = '<tr><td colspan="9"><div class="empty"><div class="empty-icon" style="opacity:.3">OK</div><div class="empty-text">No HWID mismatches found</div></div></td></tr>';
+    return;
+  }
+  tb.innerHTML = list.map(m => {
+    const ks = m.keyStatus || 'deleted';
+    const ksBadge = ks==='active'?'b-active':ks==='frozen'?'b-frozen':ks==='banned'?'b-banned':'b-expired';
+    const attemptedHwid = m.hwid
+      ? '<span class="mono" style="font-size:10px;color:#f87171;max-width:130px;display:inline-block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+m.hwid+'">'+m.hwid.substring(0,20)+(m.hwid.length>20?'...':'')+'</span>'
+      : '<span style="color:var(--text3)">—</span>';
+    const boundHwid = m.hwidBound
+      ? '<span class="mono" style="font-size:10px;color:var(--p3);max-width:120px;display:inline-block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+m.hwidBound+'">'+m.hwidBound.substring(0,20)+'...</span>'
+      : '<span style="color:var(--text3);font-size:11px">Unbound</span>';
+    const resetBtn = (ks !== 'deleted' && ks !== 'banned')
+      ? '<button class="btn btn-ghost btn-xs" style="color:#93c5fd;border-color:rgba(59,130,246,0.25)" onclick="resetHWIDFromMismatch(\'' + m.key + '\')">&#8635; Reset</button>'
+      : '';
+    return '<tr class="hwid-mismatch-row">'
+      + '<td class="mono" style="font-size:10px;white-space:nowrap">'+fmtTime(m.timestamp)+'</td>'
+      + '<td><span class="kc" style="font-size:10px;color:#f87171;background:rgba(220,38,38,0.08);border-color:rgba(220,38,38,0.25)">'+((m.key||'—').substring(0,18))+'...</span></td>'
+      + '<td style="color:var(--text2);font-size:11px">'+(m.appName||'—')+'</td>'
+      + '<td><span class="badge '+ksBadge+'">'+ks+'</span></td>'
+      + '<td>'+attemptedHwid+'</td>'
+      + '<td>'+boundHwid+'</td>'
+      + '<td class="mono" style="font-size:10px">'+(m.ip||'—')+'</td>'
+      + '<td style="color:var(--text3);font-size:11px">'+(m.keyLabel||'—')+'</td>'
+      + '<td style="display:flex;gap:5px;align-items:center">'+resetBtn+'<button class="btn btn-ghost btn-xs" onclick="copyText(\'' + m.key + '\')">&#128203;</button></td>'
+      + '</tr>';
+  }).join('');
+}
+
+async function resetHWIDFromMismatch(key) {
+  if (!confirm('Reset HWID for this key? The user will be able to re-bind to a new machine.')) return;
+  const r = await post('/api/admin/keys/'+encodeURIComponent(key)+'/reset-hwid');
+  if (r.success) { toast('HWID reset — key unlocked', 'success'); loadHwidMismatches(); }
+  else toast(r.message || 'Error', 'error');
+}
+
+// ══════════════ RESELLER DASHBOARD (updated) ══════════════
+async function loadResellerDashboard(){
+  document.getElementById('r-display-name').textContent=RDATA.displayName;
+  const pd=document.getElementById('r-permissions-display');
+  if(pd){pd.className='rs-perm-grid';pd.innerHTML=PERMS.map(p=>{const g=RDATA.permissions[p.key];return '<div class="rs-perm-item '+(g?'granted':'denied')+'"><div class="rs-perm-dot"></div><span class="rs-perm-text">'+p.label+'</span></div>';}).join('');}
+  ['r-qa-generate','r-qa-keys','r-qa-logs'].forEach((id,i)=>{const el=document.getElementById(id);if(el)el.style.display=[RDATA.permissions.generateKeys,RDATA.permissions.viewKeys,RDATA.permissions.viewLogs][i]?'':'none';});
+  const r=await rget('/api/reseller/stats');
+  if(r.success){
+    const s=r.stats;anim('rs-total',s.totalKeys);const rt2=document.getElementById('rs-total-2');if(rt2)rt2.textContent=s.totalKeys;
+    anim('rs-active',s.activeKeys);anim('rs-banned',s.bannedKeys||0);
+    if(s.keyQuota>0){
+      const qs=document.getElementById('rs-quota');if(qs)qs.textContent=s.keysGenerated+'/'+s.keyQuota;
+      const sl=document.getElementById('rs-slots-left');if(sl)sl.textContent=s.slotsLeft;
+      const ql=document.getElementById('rs-quota-label');if(ql)ql.textContent=s.keysGenerated+' of '+s.keyQuota+' used';
+      const qf=document.getElementById('rs-quota-fill');if(qf)qf.style.width=Math.min(Math.round(s.keysGenerated/s.keyQuota*100),100)+'%';
+    }else{
+      const qs=document.getElementById('rs-quota');if(qs)qs.textContent='INF';
+      const sl=document.getElementById('rs-slots-left');if(sl)sl.textContent='INF';
+      const ql=document.getElementById('rs-quota-label');if(ql)ql.textContent='Unlimited';
+    }
+    const mx=Math.max(s.totalKeys,1);
+    setTimeout(()=>{
+      const ab=document.getElementById('rs-active-bar');const bb=document.getElementById('rs-banned-bar');
+      if(ab)ab.style.width=Math.round(s.activeKeys/mx*100)+'%';
+      if(bb)bb.style.width=Math.round((s.bannedKeys||0)/mx*100)+'%';
+    },200);
+  }
+  const vlb=document.getElementById('r-view-logs-btn');if(vlb)vlb.style.display=RDATA.permissions.viewLogs?'':'none';
+  const act=document.getElementById('r-dash-activity');
+  if(RDATA.permissions.viewLogs){
+    const lr=await rget('/api/reseller/logs');
+    if(lr.success&&lr.logs.length){
+      act.innerHTML=lr.logs.slice(0,8).map(l=>'<div style="display:flex;align-items:center;gap:10px;padding:9px 18px;border-bottom:1px solid rgba(245,158,11,0.05)"><span style="color:var(--text3);font-family:JetBrains Mono,monospace;font-size:10px;min-width:65px;flex-shrink:0">'+fmtTimeShort(l.timestamp)+'</span>'+rb(l.result)+'<span style="color:var(--text3);font-size:10px;margin-left:auto;flex-shrink:0">'+(RDATA.permissions.viewIP?(l.ip||'&mdash;'):'&mdash;')+'</span></div>').join('');
+    }else{act.innerHTML='<div style="text-align:center;padding:36px;color:var(--text3);font-size:12px">No activity yet</div>';}
+  }else{act.innerHTML='<div style="text-align:center;padding:36px;color:var(--text3);font-size:12px">Log access not enabled</div>';}
+}
+
 // POLL
 function startPoll(){
   logTimer=setInterval(async()=>{
@@ -2266,23 +2531,7 @@ async function saveReseller(){
 async function toggleReseller(id){const r=await post('/api/admin/resellers/'+id+'/toggle');if(r.success){toast(r.active?'Activated':'Suspended','info');loadResellers();}}
 async function deleteReseller(id){if(!confirm('Delete reseller?'))return;await del('/api/admin/resellers/'+id);toast('Deleted','error');loadResellers();}
 
-// ═══════════════ RESELLER DASHBOARD ═══════════════
-async function loadResellerDashboard(){
-  document.getElementById('r-display-name').textContent=RDATA.displayName+' — Dashboard';
-  const pd=document.getElementById('r-permissions-display');
-  pd.innerHTML=PERMS.map(p=>`<div style="display:flex;align-items:center;gap:6px;padding:6px 9px;background:var(--bg3);border:1px solid var(--border);border-radius:7px"><div style="width:6px;height:6px;border-radius:50%;background:${RDATA.permissions[p.key]?'var(--p)':'var(--text3)'};flex-shrink:0"></div><span style="font-size:11px;color:${RDATA.permissions[p.key]?'var(--text2)':'var(--text3)'}">${p.label}</span></div>`).join('');
-  const r=await rget('/api/reseller/stats');
-  if(r.success){
-    const s=r.stats; anim('rs-total',s.totalKeys); anim('rs-active',s.activeKeys); anim('rs-banned',s.bannedKeys);
-    if(s.keyQuota>0){document.getElementById('rs-quota').textContent=s.slotsLeft;document.getElementById('rs-quota-label').textContent=s.keysGenerated+'/'+s.keyQuota+' used';document.getElementById('rs-quota-fill').style.width=Math.min(Math.round(s.keysGenerated/s.keyQuota*100),100)+'%';}
-    else{document.getElementById('rs-quota').textContent='∞';document.getElementById('rs-quota-label').textContent='Unlimited';}
-    const ab=document.getElementById('rs-active-bar'); if(ab&&s.totalKeys>0) ab.style.width=Math.round(s.activeKeys/s.totalKeys*100)+'%';
-  }
-  const vlb=document.getElementById('r-view-logs-btn'); if(vlb) vlb.style.display=RDATA.permissions.viewLogs?'':'none';
-  const act=document.getElementById('r-dash-activity');
-  if(RDATA.permissions.viewLogs){const lr=await rget('/api/reseller/logs');if(lr.success&&lr.logs.length){act.innerHTML=lr.logs.slice(0,8).map(l=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 18px;border-bottom:1px solid rgba(139,92,246,0.04);font-size:11px"><span style="color:var(--text3);font-family:'JetBrains Mono',monospace;font-size:10px;min-width:65px">${fmtTimeShort(l.timestamp)}</span>${rb(l.result)}<span style="color:var(--text3);font-family:'JetBrains Mono',monospace;font-size:10px;margin-left:auto">${RDATA.permissions.viewIP?(l.ip||'—'):'—'}</span></div>`).join('');} else act.innerHTML='<div style="text-align:center;padding:24px;color:var(--text3);font-size:12px">No activity yet</div>';}
-  else act.innerHTML='<div style="text-align:center;padding:24px;color:var(--text3);font-size:12px">Log access not enabled</div>';
-}
+
 
 // ═══════════════ RESELLER KEYS ═══════════════
 async function loadResellerKeys(){
