@@ -2214,35 +2214,36 @@ function filterHwidMismatches() {
 function renderHwidMismatches(list) {
   const tb = document.getElementById('hwid-mismatches-body');
   if (!list.length) {
-    tb.innerHTML = '<tr><td colspan="9"><div class="empty"><div class="empty-icon" style="opacity:.3">OK</div><div class="empty-text">No HWID mismatches found</div></div></td></tr>';
+    tb.innerHTML = '<tr><td colspan="9"><div class="empty"><div class="empty-icon" style="opacity:.3">&#10003;</div><div class="empty-text">No HWID mismatches found</div></div></td></tr>';
     return;
   }
   tb.innerHTML = list.map(m => {
     const ks = m.keyStatus || 'deleted';
     const ksBadge = ks==='active'?'b-active':ks==='frozen'?'b-frozen':ks==='banned'?'b-banned':'b-expired';
+    const safeKey = encodeURIComponent(m.key || '');
     const attemptedHwid = m.hwid
-      ? '<span class="mono" style="font-size:10px;color:#f87171;max-width:130px;display:inline-block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+m.hwid+'">'+m.hwid.substring(0,20)+(m.hwid.length>20?'...':'')+'</span>'
-      : '<span style="color:var(--text3)">—</span>';
+      ? '<span class="mono" style="font-size:10px;color:#f87171;max-width:130px;display:inline-block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + m.hwid + '">' + m.hwid.substring(0,20) + (m.hwid.length>20?'...':'') + '</span>'
+      : '<span style="color:var(--text3)">&mdash;</span>';
     const boundHwid = m.hwidBound
-      ? '<span class="mono" style="font-size:10px;color:var(--p3);max-width:120px;display:inline-block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+m.hwidBound+'">'+m.hwidBound.substring(0,20)+'...</span>'
+      ? '<span class="mono" style="font-size:10px;color:var(--p3);max-width:120px;display:inline-block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + m.hwidBound + '">' + m.hwidBound.substring(0,20) + '...</span>'
       : '<span style="color:var(--text3);font-size:11px">Unbound</span>';
     const resetBtn = (ks !== 'deleted' && ks !== 'banned')
-      ? '<button class="btn btn-ghost btn-xs" style="color:#93c5fd;border-color:rgba(59,130,246,0.25)" onclick="resetHWIDFromMismatch(\'' + m.key + '\')">&#8635; Reset</button>'
+      ? '<button class="btn btn-ghost btn-xs" style="color:#93c5fd;border-color:rgba(59,130,246,0.25)" data-k="' + safeKey + '" onclick="resetHWIDFromMismatch(decodeURIComponent(this.dataset.k))">&#8635; Reset</button>'
       : '';
+    const copyBtn = '<button class="btn btn-ghost btn-xs" data-k="' + safeKey + '" onclick="copyText(decodeURIComponent(this.dataset.k))" title="Copy key">&#128203;</button>';
     return '<tr class="hwid-mismatch-row">'
-      + '<td class="mono" style="font-size:10px;white-space:nowrap">'+fmtTime(m.timestamp)+'</td>'
-      + '<td><span class="kc" style="font-size:10px;color:#f87171;background:rgba(220,38,38,0.08);border-color:rgba(220,38,38,0.25)">'+((m.key||'—').substring(0,18))+'...</span></td>'
-      + '<td style="color:var(--text2);font-size:11px">'+(m.appName||'—')+'</td>'
-      + '<td><span class="badge '+ksBadge+'">'+ks+'</span></td>'
-      + '<td>'+attemptedHwid+'</td>'
-      + '<td>'+boundHwid+'</td>'
-      + '<td class="mono" style="font-size:10px">'+(m.ip||'—')+'</td>'
-      + '<td style="color:var(--text3);font-size:11px">'+(m.keyLabel||'—')+'</td>'
-      + '<td style="display:flex;gap:5px;align-items:center">'+resetBtn+'<button class="btn btn-ghost btn-xs" onclick="copyText(\'' + m.key + '\')">&#128203;</button></td>'
+      + '<td class="mono" style="font-size:10px;white-space:nowrap">' + fmtTime(m.timestamp) + '</td>'
+      + '<td><span class="kc" style="font-size:10px;color:#f87171;background:rgba(220,38,38,0.08);border-color:rgba(220,38,38,0.25)">' + ((m.key||'').substring(0,18)) + '...</span></td>'
+      + '<td style="color:var(--text2);font-size:11px">' + (m.appName||'&mdash;') + '</td>'
+      + '<td><span class="badge ' + ksBadge + '">' + ks + '</span></td>'
+      + '<td>' + attemptedHwid + '</td>'
+      + '<td>' + boundHwid + '</td>'
+      + '<td class="mono" style="font-size:10px">' + (m.ip||'&mdash;') + '</td>'
+      + '<td style="color:var(--text3);font-size:11px">' + (m.keyLabel||'&mdash;') + '</td>'
+      + '<td style="display:flex;gap:5px;align-items:center">' + resetBtn + copyBtn + '</td>'
       + '</tr>';
   }).join('');
 }
-
 async function resetHWIDFromMismatch(key) {
   if (!confirm('Reset HWID for this key? The user will be able to re-bind to a new machine.')) return;
   const r = await post('/api/admin/keys/'+encodeURIComponent(key)+'/reset-hwid');
