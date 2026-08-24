@@ -56,16 +56,44 @@ function safeCompare(a, b) {
   try { return timingSafeEqual(Buffer.from(String(a)), Buffer.from(String(b))); }
   catch { return false; }
 }
+// Cloudflare IP ranges (used to validate CF-Connecting-IP is trustworthy)
+const CF_IP_RANGES = [
+  '173.245.48.', '103.21.244.', '103.22.200.', '103.31.4.',
+  '141.101.64.', '108.162.192.', '190.93.240.', '188.114.96.',
+  '197.234.240.', '198.41.128.', '162.158.', '104.16.',
+  '104.17.', '104.18.', '104.19.', '104.20.', '104.21.', '104.22.',
+  '104.23.', '104.24.', '104.25.', '104.26.', '104.27.',
+  '172.64.', '172.65.', '172.66.', '172.67.', '172.68.',
+  '172.69.', '172.70.', '172.71.',
+  '131.0.72.', '2400:cb00:', '2606:4700:', '2803:f800:',
+  '2405:b500:', '2405:8100:', '2a06:98c0:', '2c0f:f248:'
+];
+
+function isCloudflareIP(ip) {
+  return CF_IP_RANGES.some(range => ip.startsWith(range));
+}
+
 function getIP(req) {
+  // 1. CF-Connecting-IP — most reliable when Cloudflare proxy is ON
+  //    Only trust it if the request actually came from a Cloudflare IP
+  const cfIP = req.headers['cf-connecting-ip'];
+  const socketRaw = (req.socket.remoteAddress || req.connection.remoteAddress || '').replace(/^::ffff:/, '');
+  if (cfIP && isCloudflareIP(socketRaw)) return cfIP.trim();
+
+  // 2. x-forwarded-for — used by Render's load balancer and Cloudflare
   const forwarded = req.headers['x-forwarded-for'];
   if (forwarded) return forwarded.split(',')[0].trim();
-  const raw = req.socket.remoteAddress || req.connection.remoteAddress || '';
-  const socketIP = raw.replace(/^::ffff:/, '');
-  if (socketIP === '127.0.0.1' || socketIP === '::1' || socketIP === '') {
-    const clientReported = req.headers['x-real-ip'] || (req.body && req.body.real_ip) || '';
+
+  // 3. x-real-ip fallback
+  const realIP = req.headers['x-real-ip'];
+  if (realIP) return realIP.trim();
+
+  // 4. Socket IP fallback
+  if (socketRaw === '127.0.0.1' || socketRaw === '::1' || socketRaw === '') {
+    const clientReported = (req.body && req.body.real_ip) || '';
     if (clientReported && clientReported !== '127.0.0.1') return clientReported.trim();
   }
-  return socketIP;
+  return socketRaw;
 }
 
 const https = require('https');
@@ -170,13 +198,14 @@ function requireAdminOrReseller(req, res, next) {
 }
 
 // ── EXPRESS SETUP ─────────────────────────────────────────────────────────────
+app.set('trust proxy', true); // Trust Cloudflare + Render proxy headers
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,DELETE,OPTIONS,PATCH');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-admin-token, x-reseller-token, x-public-key, x-secret-key, x-request-id, x-timestamp');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-admin-token, x-reseller-token, x-public-key, x-secret-key, x-request-id, x-timestamp, CF-Connecting-IP');
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
   if (req.method === 'OPTIONS') return res.sendStatus(200);
