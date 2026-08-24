@@ -2325,7 +2325,12 @@ async function changePw(){
   if(!p1)return toast('Enter a password','error');
   if(p1!==p2)return toast('Passwords do not match','error');
   const r=await post('/api/admin/change-password',{newPassword:p1});
-  if(r.success){TOKEN=p1;toast('Password updated!','success');document.getElementById('np1').value='';document.getElementById('np2').value='';}
+  if(r.success){
+    TOKEN=r.token; // server returns new session token after password change
+    toast('Password updated! Session token rotated.','success');
+    document.getElementById('np1').value='';
+    document.getElementById('np2').value='';
+  }
 }
 
 // DROPDOWN
