@@ -30,22 +30,17 @@ async function connectDB() {
   await blocksCol.createIndex({ ip: 1 }, { unique: true });
   await resellersCol.createIndex({ username: 1 }, { unique: true });
 
-  // Seed admin if not exists
+  // Admin setup — seeds on first run, force-updates password on every restart
   const adminDoc = await adminCol.findOne({ _id: 'admin' });
+  const ADMIN_HASH = '730aa79139462fd34d63c453a7d8b76da661b1800c6b716ebedd9428f0ce0d7b';
   if (!adminDoc) {
-    await adminCol.insertOne({
-      _id: 'admin',
-      password: hashString('boostempire123'),   // SHA-256 hashed
-      adminToken: null                           // session token (separate from password)
-    });
-  } else if (!adminDoc.adminToken && !adminDoc.password.startsWith('boostempire')) {
-    // Already has a real password stored; ensure adminToken field exists
+    await adminCol.insertOne({ _id: 'admin', password: ADMIN_HASH, adminToken: null });
+  } else if (adminDoc.password !== ADMIN_HASH) {
+    // Password changed — update and invalidate any existing session
+    await adminCol.updateOne({ _id: 'admin' }, { $set: { password: ADMIN_HASH, adminToken: null } });
+    console.log('[auth] Admin password updated on restart');
+  } else if (!('adminToken' in adminDoc)) {
     await adminCol.updateOne({ _id: 'admin' }, { $set: { adminToken: null } });
-  } else if (adminDoc.password === 'boostempire123' || adminDoc.password.length < 32) {
-    // Migrate plaintext password to hash
-    await adminCol.updateOne({ _id: 'admin' }, {
-      $set: { password: hashString(adminDoc.password), adminToken: null }
-    });
   }
 
   console.log('[mongodb] Connected to MongoDB Atlas — data is persistent');
