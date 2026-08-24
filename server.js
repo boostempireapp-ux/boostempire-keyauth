@@ -32,7 +32,21 @@ async function connectDB() {
 
   // Seed admin if not exists
   const adminDoc = await adminCol.findOne({ _id: 'admin' });
-  if (!adminDoc) await adminCol.insertOne({ _id: 'admin', password: 'boostempire123' });
+  if (!adminDoc) {
+    await adminCol.insertOne({
+      _id: 'admin',
+      password: hashString('boostempire123'),   // SHA-256 hashed
+      adminToken: null                           // session token (separate from password)
+    });
+  } else if (!adminDoc.adminToken && !adminDoc.password.startsWith('boostempire')) {
+    // Already has a real password stored; ensure adminToken field exists
+    await adminCol.updateOne({ _id: 'admin' }, { $set: { adminToken: null } });
+  } else if (adminDoc.password === 'boostempire123' || adminDoc.password.length < 32) {
+    // Migrate plaintext password to hash
+    await adminCol.updateOne({ _id: 'admin' }, {
+      $set: { password: hashString(adminDoc.password), adminToken: null }
+    });
+  }
 
   console.log('[mongodb] Connected to MongoDB Atlas — data is persistent');
 }
@@ -82,6 +96,25 @@ function log(appId, keyVal, hwid, appName, action, result, ip, details='') {
 }
 
 // ── RATE LIMITER ──────────────────────────────────────────────────────────────
+// ── REPLAY PROTECTION ────────────────────────────────────────────
+const nonceCache  = new Map();
+const NONCE_TTL   = 5 * 60 * 1000;
+const TS_SKEW_MAX = 5 * 60 * 1000;
+setInterval(() => { const n=Date.now(); for(const[k,v] of nonceCache) if(n>v) nonceCache.delete(k); }, 60_000);
+
+// ── PER-KEY MISMATCH AUTO-FREEZE ──────────────────────────────────────────
+const keyMismatch        = new Map();
+const MISMATCH_FREEZE_AT = 8;
+const MISMATCH_WINDOW    = 10 * 60 * 1000;
+function trackKeyMismatch(key) {
+  const now = Date.now();
+  const rec = keyMismatch.get(key) || { count: 0, windowStart: now };
+  if (now - rec.windowStart > MISMATCH_WINDOW) { rec.count = 1; rec.windowStart = now; }
+  else rec.count++;
+  keyMismatch.set(key, rec);
+  return rec.count;
+}
+
 const activeSessions = new Map();
 const rateLimitMap   = new Map();
 const failCounts     = new Map();
@@ -113,35 +146,12 @@ async function trackFail(ip) {
   }
 }
 
-// ── REPLAY PROTECTION (nonce + timestamp) ────────────────────────────────────
-const nonceCache  = new Map(); // nonce → expiry ms
-const NONCE_TTL   = 5 * 60 * 1000;           // 5 min replay window
-const TS_SKEW_MAX = 5 * 60 * 1000;           // max ±5 min clock skew
-
-setInterval(() => {
-  const now = Date.now();
-  for (const [k, exp] of nonceCache) { if (now > exp) nonceCache.delete(k); }
-}, 60_000);
-
-// ── PER-KEY MISMATCH ABUSE TRACKER ───────────────────────────────────────────
-const keyMismatch = new Map(); // key → { count, window_start }
-const MISMATCH_FREEZE_AT = 8;          // freeze key after 8 mismatches
-const MISMATCH_WINDOW    = 10 * 60 * 1000; // within a 10-min window
-
-function trackKeyMismatch(key) {
-  const now  = Date.now();
-  const rec  = keyMismatch.get(key) || { count: 0, windowStart: now };
-  if (now - rec.windowStart > MISMATCH_WINDOW) { rec.count = 1; rec.windowStart = now; }
-  else rec.count++;
-  keyMismatch.set(key, rec);
-  return rec.count;
-}
-
 // ── AUTH MIDDLEWARE ───────────────────────────────────────────────────────────
 async function requireAdmin(req, res, next) {
   const token = req.headers['x-admin-token'] || req.query.token;
+  if (!token) return res.status(401).json({ success:false, message:'Unauthorized' });
   const doc = await adminCol.findOne({ _id: 'admin' });
-  if (!doc || !safeCompare(token, doc.password))
+  if (!doc || !doc.adminToken || !safeCompare(token, doc.adminToken))
     return res.status(401).json({ success:false, message:'Unauthorized' });
   next();
 }
@@ -198,44 +208,34 @@ app.post('/api/auth', rateLimit, async (req, res) => {
     return res.json({ success:false, code:'NO_KEY', message:'Missing or invalid license key' });
   if (!hwid||typeof hwid!=='string'||hwid.length>200)
     return res.json({ success:false, code:'NO_HWID', message:'Missing or invalid HWID' });
-  // ── Timestamp replay guard ─────────────────────────────────────────────────
-  const clientTs = parseInt(req.headers['x-timestamp'] || req.body.ts || '0', 10);
-  if (clientTs) {
-    const skew = Math.abs(Date.now() - clientTs);
-    if (skew > TS_SKEW_MAX) {
-      log(null,key,hwid,app_name,'AUTH','REPLAY_REJECTED',ip,`Timestamp skew ${skew}ms`);
-      await trackFail(ip);
-      return res.json({ success:false, code:'REPLAY_REJECTED', message:'Request timestamp expired — check your clock' });
-    }
+  // Enhanced HWID validation
+  const SUSPICIOUS_HWID_PAT = /^(0+|f+|a+|1+|deadbeef|cafebabe|test|fake|crack|bypass|debug|cheat|null|none|unknown|demo|frida|x64dbg|olly|cheatengine|ida|hook|inject|dump|unpack|patch)/i;
+  if (hwid.length < 8 || SUSPICIOUS_HWID_PAT.test(hwid)) {
+    log(null,key,hwid,app_name,'AUTH','INVALID_HWID',ip,'Suspicious HWID pattern');
+    await trackFail(ip);
+    return res.json({ success:false, code:'INVALID_HWID', message:'Invalid hardware ID' });
   }
-
-  // ── Nonce dedup guard ──────────────────────────────────────────────────────
+  // Entropy check — low-variety HWIDs are fake
+  if (new Set(hwid.replace(/-/g,'')).size < 4) {
+    log(null,key,hwid,app_name,'AUTH','INVALID_HWID',ip,'Low-entropy HWID');
+    await trackFail(ip);
+    return res.json({ success:false, code:'INVALID_HWID', message:'Invalid hardware ID' });
+  }
+  // Timestamp + nonce replay check
+  const clientTs = parseInt(req.headers['x-timestamp'] || req.body.ts || '0', 10);
+  if (clientTs && Math.abs(Date.now() - clientTs) > TS_SKEW_MAX) {
+    log(null,key,hwid,app_name,'AUTH','REPLAY_REJECTED',ip,'Timestamp expired');
+    await trackFail(ip);
+    return res.json({ success:false, code:'REPLAY_REJECTED', message:'Request timestamp expired' });
+  }
   const nonce = req.headers['x-request-id'] || req.body.nonce;
   if (nonce && typeof nonce === 'string' && nonce.length >= 8 && nonce.length <= 128) {
     if (nonceCache.has(nonce)) {
       log(null,key,hwid,app_name,'AUTH','REPLAY_REJECTED',ip,'Duplicate nonce');
       await trackFail(ip);
-      return res.json({ success:false, code:'REPLAY_REJECTED', message:'Duplicate request detected' });
+      return res.json({ success:false, code:'REPLAY_REJECTED', message:'Duplicate request' });
     }
     nonceCache.set(nonce, Date.now() + NONCE_TTL);
-  }
-
-  // ── Enhanced HWID pattern check ────────────────────────────────────────────
-  const SUSPICIOUS_HWID = /^(0+|1+|f+|a+|deadbeef|cafebabe|test|fake|crack|bypass|debug|cheat|null|none|unknown|demo|trial|free|hacked|patch|inject|hook|dump|unpack|reverse|frida|ida64|x64dbg|olly|ce|cheatengine)/i;
-  const HEX_ENTROPY_MIN = 12; // a real HWID should have varied chars
-
-  if (hwid.length < 8 || SUSPICIOUS_HWID.test(hwid.toLowerCase())) {
-    log(null,key,hwid,app_name,'AUTH','INVALID_HWID',ip,'Suspicious HWID pattern rejected');
-    await trackFail(ip);
-    return res.json({ success:false, code:'INVALID_HWID', message:'Invalid hardware ID' });
-  }
-
-  // Entropy check — reject low-entropy HWIDs (all same character / near-zero variation)
-  const uniqueChars = new Set(hwid.replace(/-/g,'')).size;
-  if (uniqueChars < 4) {
-    log(null,key,hwid,app_name,'AUTH','INVALID_HWID',ip,'Low-entropy HWID rejected');
-    await trackFail(ip);
-    return res.json({ success:false, code:'INVALID_HWID', message:'Invalid hardware ID' });
   }
 
   const appDoc = await appsCol.findOne({ publicKey });
@@ -264,14 +264,12 @@ app.post('/api/auth', rateLimit, async (req, res) => {
   if (doc.hwid) {
     if (!safeCompare(doc.hwid, hwidHash)) {
       await trackFail(ip);
-      // Per-key abuse tracking — auto-freeze after repeated mismatches
-      const mismatchCount = trackKeyMismatch(key);
-      const details = `Attempted HWID: ${hwid} | Mismatch #${mismatchCount}`;
-      log(appDoc._id,key,hwid,app_name||appDoc.name,'AUTH','HWID_MISMATCH',ip,details);
-      if (mismatchCount >= MISMATCH_FREEZE_AT && doc.status === 'active') {
+      const mCount = trackKeyMismatch(key);
+      log(appDoc._id,key,hwid,app_name||appDoc.name,'AUTH','HWID_MISMATCH',ip,`Attempt #${mCount} | Tried: ${hwid}`);
+      if (mCount >= MISMATCH_FREEZE_AT && doc.status === 'active') {
         await keysCol.updateOne({ key }, { $set:{ status:'frozen' } });
         activeSessions.delete(key);
-        log(appDoc._id,key,hwid,app_name||appDoc.name,'AUTH','AUTO_FROZEN',ip,`Auto-frozen after ${mismatchCount} HWID mismatches`);
+        log(appDoc._id,key,hwid,app_name||appDoc.name,'AUTH','AUTO_FROZEN',ip,`Auto-frozen after ${mCount} HWID mismatches`);
         keyMismatch.delete(key);
       }
       return res.json({ success:false, code:'HWID_MISMATCH', message:'HWID mismatch — please contact support' });
@@ -424,17 +422,21 @@ app.get('/api/admin/stats', requireAdmin, async (req, res) => {
   ]);
   res.json({ success:true, stats:{ total,active,banned,used,recentAuths,hwidBlocks,totalApps,blockedIPs,totalResellers } });
 });
-// ── ADMIN: HWID MISMATCHES ─────────────────────────────────────────────────────
+// Admin login brute-force tracking
+const adminLoginFails = new Map(); // ip -> { count, lastFail }
+const ADMIN_LOCKOUT_FAILS = 10;
+const ADMIN_LOCKOUT_MS    = 15 * 60 * 1000; // 15 min
+
+// ── ADMIN: HWID MISMATCHES ────────────────────────────────────────────────────
 app.get('/api/admin/hwid-mismatches', requireAdmin, async (req, res) => {
   const mismatches = await logsCol.find({ result:'HWID_MISMATCH' }).sort({ timestamp:-1 }).limit(400).toArray();
-  // Enrich each record with current key status + bound HWID
   const enriched = await Promise.all(mismatches.map(async l => {
     const keyDoc = await keysCol.findOne({ key: l.key });
     return {
       ...l,
-      keyStatus : keyDoc ? keyDoc.status  : 'deleted',
-      keyLabel  : keyDoc ? (keyDoc.label  || '')      : '',
-      hwidBound : keyDoc ? (keyDoc.hwidRaw || '')     : '',
+      keyStatus : keyDoc ? keyDoc.status    : 'deleted',
+      keyLabel  : keyDoc ? (keyDoc.label  || '') : '',
+      hwidBound : keyDoc ? (keyDoc.hwidRaw || '') : '',
       appName   : l.app_name || 'Unknown',
     };
   }));
@@ -442,15 +444,36 @@ app.get('/api/admin/hwid-mismatches', requireAdmin, async (req, res) => {
 });
 
 app.post('/api/admin/login', async (req, res) => {
-  const doc = await adminCol.findOne({ _id:'admin' });
-  if (doc && safeCompare(req.body.password, doc.password)) res.json({ success:true, token:doc.password });
-  else res.json({ success:false, message:'Wrong password' });
+  const ip = getIP(req);
+  const now = Date.now();
+  const failRec = adminLoginFails.get(ip) || { count: 0, lastFail: 0 };
+  // Lockout check
+  if (failRec.count >= ADMIN_LOCKOUT_FAILS && now - failRec.lastFail < ADMIN_LOCKOUT_MS) {
+    return res.status(429).json({ success: false, message: 'Too many failed attempts — wait 15 minutes' });
+  }
+  await authJitter(); // same timing jitter as auth endpoint
+  const doc = await adminCol.findOne({ _id: 'admin' });
+  const match = doc && safeCompare(hashString(req.body.password), doc.password);
+  if (match) {
+    adminLoginFails.delete(ip);
+    const token = genSessionToken(); // brand new random token, NOT the password
+    await adminCol.updateOne({ _id: 'admin' }, { $set: { adminToken: token } });
+    res.json({ success: true, token });
+  } else {
+    failRec.count++;
+    failRec.lastFail = now;
+    adminLoginFails.set(ip, failRec);
+    res.json({ success: false, message: 'Wrong password' });
+  }
 });
 app.post('/api/admin/change-password', requireAdmin, async (req, res) => {
   const { newPassword } = req.body;
-  if (!newPassword||newPassword.length<6) return res.json({ success:false, message:'Min 6 chars' });
-  await adminCol.updateOne({ _id:'admin' }, { $set:{ password:newPassword } });
-  res.json({ success:true });
+  if (!newPassword || newPassword.length < 6) return res.json({ success:false, message:'Min 6 chars' });
+  const newToken = genSessionToken(); // rotate session token on password change
+  await adminCol.updateOne({ _id:'admin' }, {
+    $set: { password: hashString(newPassword), adminToken: newToken }
+  });
+  res.json({ success:true, token: newToken }); // return new token so UI stays logged in
 });
 
 // ── ADMIN: RESELLERS ──────────────────────────────────────────────────────────
