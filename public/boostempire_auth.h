@@ -44,7 +44,7 @@
 // ─── YOUR APP CONFIGURATION ──────────────────────────────────────────────────
 // These are XOR-encrypted at compile time — do NOT appear as plaintext in IDA
 #define BE_PUBLIC_KEY   "pk_edf241e18107406ebf19effb369c129c"
-#define BE_HOST         L"boostempire-keyauth.onrender.com"
+#define BE_HOST         L"auth.boostempireauth.uk"
 #define BE_PORT         443
 // ─────────────────────────────────────────────────────────────────────────────
 
