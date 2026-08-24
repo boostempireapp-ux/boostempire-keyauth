@@ -28,18 +28,16 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 ::-webkit-scrollbar-thumb:hover{background:var(--p)}
 
 /* LOGIN */
-#lightning-canvas{position:fixed;inset:0;z-index:99;pointer-events:none;}
 #login-screen{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;
-  background:#000000;}
-.login-box{background:rgba(10,5,25,0.45);border:1px solid rgba(167,139,250,0.3);border-radius:20px;
-  padding:48px 44px;width:400px;text-align:center;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
-  box-shadow:0 0 0 1px rgba(139,92,246,0.15);}
+  background:radial-gradient(ellipse 80% 70% at 50% 0%,rgba(139,92,246,0.18) 0%,transparent 65%);}
+.login-box{background:rgba(8,8,8,0.97);border:1px solid var(--border2);border-radius:20px;
+  padding:48px 44px;width:400px;text-align:center;
+  box-shadow:0 0 0 1px rgba(139,92,246,0.12),0 40px 80px rgba(0,0,0,0.9),0 0 60px rgba(139,92,246,0.06);}
 .login-logo-img{width:72px;height:72px;object-fit:cover;border-radius:16px;margin:0 auto 16px;display:block;
   box-shadow:0 8px 32px rgba(139,92,246,0.4);}
 .brand-big{font-family:'Rajdhani',sans-serif;font-size:34px;font-weight:700;letter-spacing:4px;
-  background:linear-gradient(135deg,#f3e8ff 0%,#c4b5fd 50%,#a78bfa 100%);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;display:block;line-height:1;
-  filter:drop-shadow(0 0 12px rgba(167,139,250,0.7));}
+  background:linear-gradient(135deg,#c4b5fd 0%,#8b5cf6 50%,#6d28d9 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;display:block;line-height:1;}
 .brand-sub{font-size:10px;letter-spacing:5px;color:var(--text3);text-transform:uppercase;display:block;margin:4px 0 28px;}
 .inp{width:100%;padding:12px 15px;background:rgba(139,92,246,0.05);
   border:1px solid var(--border2);border-radius:var(--r);
@@ -397,7 +395,7 @@ tbody td{padding:9px 13px;vertical-align:middle;}
 .btn-gold:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(245,158,11,0.35);}
 .login-tabs{display:flex;border:1px solid var(--border2);border-radius:var(--r);overflow:hidden;margin-bottom:20px;}
 .login-tab{flex:1;padding:9px;font-size:12px;font-weight:600;cursor:pointer;color:var(--text3);transition:all .15s;text-align:center;}
-.login-tab.active{background:rgba(109,40,217,0.35);color:#e9d5ff;}
+.login-tab.active{background:var(--pdim);color:var(--p3);}
 .modal-wide{width:700px;}
 .perm-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
 .perm-item{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;transition:border-color .15s;}
@@ -466,7 +464,6 @@ tbody td{padding:9px 13px;vertical-align:middle;}
 <body>
 
 <!-- LOGIN -->
-<canvas id="lightning-canvas"></canvas>
 <div id="login-screen">
   <div class="login-box">
     <img src="logo.png" class="login-logo-img" alt="BoostEmpire"/>
@@ -479,13 +476,11 @@ tbody td{padding:9px 13px;vertical-align:middle;}
     <div id="login-admin-form">
       <input class="inp" type="password" id="lp" placeholder="Admin password…" onkeydown="if(event.key==='Enter')doLogin()"/>
       <button class="btn btn-primary" onclick="doLogin()">Sign In as Admin</button>
-      <div style="margin-top:14px;font-size:12px;color:rgba(167,139,250,0.55);">Don't have an account? Get one at <a href="https://discord.gg/hxu" target="_blank" style="color:#a78bfa;text-decoration:none;">discord.gg/hxu</a></div>
     </div>
     <div id="login-reseller-form" style="display:none">
       <input class="inp" type="text" id="lr-user" placeholder="Username…" onkeydown="if(event.key==='Enter')doResellerLogin()"/>
       <input class="inp" type="password" id="lr-pass" placeholder="Password…" onkeydown="if(event.key==='Enter')doResellerLogin()"/>
       <button class="btn btn-primary" onclick="doResellerLogin()">Sign In as Reseller</button>
-      <div style="margin-top:14px;font-size:12px;color:rgba(167,139,250,0.55);">Don't have an account? Get one at <a href="https://discord.gg/hxu" target="_blank" style="color:#a78bfa;text-decoration:none;">discord.gg/hxu</a></div>
     </div>
     <div class="lerr" id="lerr"></div>
   </div>
@@ -2604,97 +2599,6 @@ async function rget(url){const r=await fetch(url,{headers:{'x-reseller-token':RT
 async function rpost(url,body={}){const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','x-reseller-token':RTOKEN},body:JSON.stringify(body)});return r.json();}
 async function rdel(url){const r=await fetch(url,{method:'DELETE',headers:{'x-reseller-token':RTOKEN}});return r.json();}
 
-
-// ── LIGHTNING BACKGROUND ─────────────────────────────────────────────────────
-(function(){
-  const canvas=document.getElementById('lightning-canvas');
-  if(!canvas)return;
-  const ctx=canvas.getContext('2d');
-
-  function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
-  resize();
-  window.addEventListener('resize',()=>{resize();drawScene();});
-
-  function seeded(seed){
-    let s=seed;
-    return function(){s=(s*16807)%2147483647;return(s-1)/2147483646;};
-  }
-
-  function boltPts(x1,y1,x2,y2,spread,depth,r){
-    const pts=[{x:x1,y:y1}];
-    function seg(ax,ay,bx,by,d,sp){
-      if(d<=0){pts.push({x:bx,y:by});return;}
-      const mx=(ax+bx)/2+(r()-.5)*sp;
-      const my=(ay+by)/2+(r()-.5)*sp*0.35;
-      seg(ax,ay,mx,my,d-1,sp*.6);
-      seg(mx,my,bx,by,d-1,sp*.6);
-    }
-    seg(x1,y1,x2,y2,depth,spread);
-    return pts;
-  }
-
-  function drawBolt(pts,alpha,width,color){
-    if(!pts||pts.length<2)return;
-    ctx.save();
-    ctx.beginPath();
-    ctx.moveTo(pts[0].x,pts[0].y);
-    for(let i=1;i<pts.length;i++)ctx.lineTo(pts[i].x,pts[i].y);
-    ctx.strokeStyle=color;ctx.lineWidth=width;ctx.lineCap='round';
-    ctx.globalAlpha=alpha;ctx.stroke();ctx.restore();
-  }
-
-  function drawScene(){
-    const W=canvas.width,H=canvas.height;
-    const rng=seeded(42);
-
-    ctx.fillStyle='#07000f';
-    ctx.fillRect(0,0,W,H);
-
-    // Background purple cloud glows
-    [[.3,.2,.7,'90,25,160',.30],[.75,.4,.55,'70,20,130',.22],[.5,.1,.5,'110,40,180',.20]].forEach(([rx,ry,r,c,a])=>{
-      const g=ctx.createRadialGradient(W*rx,H*ry,0,W*rx,H*ry,W*r);
-      g.addColorStop(0,`rgba(${c},${a})`);g.addColorStop(1,'rgba(0,0,0,0)');
-      ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
-    });
-
-    const defs=[
-      [.08,0,.22,.75,.32,8],[.25,0,.10,.60,.28,7],[.55,0,.42,.80,.30,8],
-      [.72,0,.85,.65,.26,7],[.90,0,.78,.55,.22,7],[.40,0,.62,.50,.25,7],
-      [.15,.1,.50,.45,.20,6],[.80,.05,.55,.40,.18,6],
-    ];
-
-    defs.forEach(([x1f,y1f,x2f,y2f,sf,d])=>{
-      const r2=seeded(Math.floor(x1f*1000+y2f*100));
-      const pts=boltPts(W*x1f,H*y1f,W*x2f,H*y2f,W*sf,d,rng);
-      // Branch from ~35% down
-      const bi=Math.floor(pts.length*.35);
-      const bp=pts[bi];
-      const bpts=boltPts(bp.x,bp.y,bp.x+(r2()-.5)*W*.35,bp.y+r2()*H*.3,W*.18,5,r2);
-
-      // Main bolt — outer glow → white core
-      drawBolt(pts,.07,44,'rgba(80,20,160,1)');
-      drawBolt(pts,.14,22,'rgba(120,50,200,1)');
-      drawBolt(pts,.30,9,'rgba(175,110,255,1)');
-      drawBolt(pts,.65,2.5,'rgba(230,200,255,1)');
-      drawBolt(pts,.85,1,'rgba(255,255,255,1)');
-      // Branch
-      drawBolt(bpts,.05,28,'rgba(80,20,160,1)');
-      drawBolt(bpts,.12,14,'rgba(120,50,200,1)');
-      drawBolt(bpts,.25,6,'rgba(175,110,255,1)');
-      drawBolt(bpts,.55,1.8,'rgba(230,200,255,1)');
-      drawBolt(bpts,.75,.8,'rgba(255,255,255,1)');
-    });
-  }
-
-  drawScene();
-})();
-
 </script>
-
-<!-- Bottom-left copyright — login screen only -->
-<div id="login-footer" style="position:fixed;bottom:18px;left:22px;z-index:101;font-size:11px;color:rgba(167,139,250,0.45);font-family:system-ui,sans-serif;letter-spacing:.3px;pointer-events:none;">
-  Copyright &copy; Boost Empire 2026, All Rights Reserved
-</div>
-
 </body>
 </html>
