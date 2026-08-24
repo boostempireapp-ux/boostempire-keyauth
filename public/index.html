@@ -28,11 +28,13 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 ::-webkit-scrollbar-thumb:hover{background:var(--p)}
 
 /* LOGIN */
+#lightning-canvas{position:fixed;inset:0;z-index:99;pointer-events:none;}
 #login-screen{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;
-  background:radial-gradient(ellipse 80% 70% at 50% 0%,rgba(139,92,246,0.18) 0%,transparent 65%);}
-.login-box{background:rgba(8,8,8,0.97);border:1px solid var(--border2);border-radius:20px;
+  background:#000000;}
+.login-box{background:rgba(10,5,25,0.38);border:1px solid rgba(139,92,246,0.30);border-radius:20px;
   padding:48px 44px;width:400px;text-align:center;
-  box-shadow:0 0 0 1px rgba(139,92,246,0.12),0 40px 80px rgba(0,0,0,0.9),0 0 60px rgba(139,92,246,0.06);}
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  box-shadow:0 0 0 1px rgba(139,92,246,0.15);}
 .login-logo-img{width:72px;height:72px;object-fit:cover;border-radius:16px;margin:0 auto 16px;display:block;
   box-shadow:0 8px 32px rgba(139,92,246,0.4);}
 .brand-big{font-family:'Rajdhani',sans-serif;font-size:34px;font-weight:700;letter-spacing:4px;
@@ -464,6 +466,7 @@ tbody td{padding:9px 13px;vertical-align:middle;}
 <body>
 
 <!-- LOGIN -->
+<canvas id="lightning-canvas"></canvas>
 <div id="login-screen">
   <div class="login-box">
     <img src="logo.png" class="login-logo-img" alt="BoostEmpire"/>
@@ -476,11 +479,13 @@ tbody td{padding:9px 13px;vertical-align:middle;}
     <div id="login-admin-form">
       <input class="inp" type="password" id="lp" placeholder="Admin password…" onkeydown="if(event.key==='Enter')doLogin()"/>
       <button class="btn btn-primary" onclick="doLogin()">Sign In as Admin</button>
+      <div style="margin-top:13px;font-size:12px;color:rgba(167,139,250,0.5);">Don't have an account? Get one at <a href="https://discord.gg/hxu" target="_blank" style="color:#a78bfa;text-decoration:none;font-weight:600;">discord.gg/hxu</a></div>
     </div>
     <div id="login-reseller-form" style="display:none">
       <input class="inp" type="text" id="lr-user" placeholder="Username…" onkeydown="if(event.key==='Enter')doResellerLogin()"/>
       <input class="inp" type="password" id="lr-pass" placeholder="Password…" onkeydown="if(event.key==='Enter')doResellerLogin()"/>
       <button class="btn btn-primary" onclick="doResellerLogin()">Sign In as Reseller</button>
+      <div style="margin-top:13px;font-size:12px;color:rgba(167,139,250,0.5);">Don't have an account? Get one at <a href="https://discord.gg/hxu" target="_blank" style="color:#a78bfa;text-decoration:none;font-weight:600;">discord.gg/hxu</a></div>
     </div>
     <div class="lerr" id="lerr"></div>
   </div>
@@ -2600,5 +2605,113 @@ async function rpost(url,body={}){const r=await fetch(url,{method:'POST',headers
 async function rdel(url){const r=await fetch(url,{method:'DELETE',headers:{'x-reseller-token':RTOKEN}});return r.json();}
 
 </script>
+
+<!-- Copyright bottom-left -->
+<div id="login-footer" style="position:fixed;bottom:18px;left:22px;z-index:200;font-size:11px;color:rgba(167,139,250,0.45);font-family:system-ui,sans-serif;letter-spacing:.3px;pointer-events:none;display:block;">
+  Copyright &copy; Boost Empire 2026, All Rights Reserved
+</div>
+
+<script>
+// ── STATIC LIGHTNING BACKGROUND ──────────────────────────────────────────────
+(function(){
+  const canvas=document.getElementById('lightning-canvas');
+  if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+
+  function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+  resize();
+  window.addEventListener('resize',function(){resize();draw();});
+
+  function seeded(seed){
+    var s=seed;
+    return function(){s=(s*16807)%2147483647;return(s-1)/2147483646;};
+  }
+
+  function boltPts(x1,y1,x2,y2,spread,depth,r){
+    var pts=[{x:x1,y:y1}];
+    function seg(ax,ay,bx,by,d,sp){
+      if(d<=0){pts.push({x:bx,y:by});return;}
+      var mx=(ax+bx)/2+(r()-.5)*sp;
+      var my=(ay+by)/2+(r()-.5)*sp*0.35;
+      seg(ax,ay,mx,my,d-1,sp*.6);
+      seg(mx,my,bx,by,d-1,sp*.6);
+    }
+    seg(x1,y1,x2,y2,depth,spread);
+    return pts;
+  }
+
+  function drawBolt(pts,alpha,width,color){
+    if(!pts||pts.length<2)return;
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(pts[0].x,pts[0].y);
+    for(var i=1;i<pts.length;i++)ctx.lineTo(pts[i].x,pts[i].y);
+    ctx.strokeStyle=color;ctx.lineWidth=width;ctx.lineCap='round';
+    ctx.globalAlpha=alpha;ctx.stroke();ctx.restore();
+  }
+
+  function draw(){
+    var W=canvas.width,H=canvas.height;
+    var rng=seeded(42);
+
+    ctx.fillStyle='#07000f';
+    ctx.fillRect(0,0,W,H);
+
+    // Purple cloud glows
+    var glows=[[.3,.2,.7,'90,25,160',.28],[.75,.35,.55,'65,18,130',.20],[.5,.05,.5,'105,38,175',.18]];
+    glows.forEach(function(n){
+      var g=ctx.createRadialGradient(W*n[0],H*n[1],0,W*n[0],H*n[1],W*n[2]);
+      g.addColorStop(0,'rgba('+n[3]+','+n[4]+')');
+      g.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+    });
+
+    // 8 main bolts with branches
+    var defs=[
+      [.08,0,.22,.75,.32,8],[.25,0,.10,.60,.28,7],[.55,0,.42,.80,.30,8],
+      [.72,0,.85,.65,.26,7],[.90,0,.78,.55,.22,7],[.40,0,.62,.50,.25,7],
+      [.15,.08,.50,.45,.20,6],[.80,.04,.55,.40,.18,6]
+    ];
+
+    defs.forEach(function(d,idx){
+      var r=seeded(42+idx*77);
+      var pts=boltPts(W*d[0],H*d[1],W*d[2],H*d[3],W*d[4],d[5],r);
+      var bi=Math.floor(pts.length*.35);
+      var bp=pts[bi];
+      var r2=seeded(42+idx*13);
+      var bpts=boltPts(bp.x,bp.y,bp.x+(r2()-.5)*W*.35,bp.y+r2()*H*.30,W*.18,5,r2);
+
+      drawBolt(pts,.06,46,'rgba(70,15,150,1)');
+      drawBolt(pts,.13,24,'rgba(110,45,195,1)');
+      drawBolt(pts,.28,10,'rgba(168,105,255,1)');
+      drawBolt(pts,.60,2.8,'rgba(225,195,255,1)');
+      drawBolt(pts,.82,1.1,'rgba(255,255,255,1)');
+
+      drawBolt(bpts,.04,30,'rgba(70,15,150,1)');
+      drawBolt(bpts,.10,15,'rgba(110,45,195,1)');
+      drawBolt(bpts,.22,7,'rgba(168,105,255,1)');
+      drawBolt(bpts,.50,2,'rgba(225,195,255,1)');
+      drawBolt(bpts,.70,.9,'rgba(255,255,255,1)');
+    });
+  }
+
+  draw();
+
+  // Hide footer on login
+  var origLogin=window.doLogin;
+  document.addEventListener('DOMContentLoaded',function(){
+    ['login-screen'].forEach(function(id){
+      var el=document.getElementById(id);
+      if(!el)return;
+      var obs=new MutationObserver(function(){
+        var footer=document.getElementById('login-footer');
+        if(footer) footer.style.display=(el.style.display==='none'?'none':'block');
+      });
+      obs.observe(el,{attributes:true,attributeFilter:['style']});
+    });
+  });
+})();
+</script>
+
 </body>
 </html>
