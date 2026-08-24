@@ -30,7 +30,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 /* LOGIN */
 #lightning-canvas{position:fixed;inset:0;z-index:99;pointer-events:none;}
 #login-screen{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;
-  background:transparent;}
+  background:#000000;}
 .login-box{background:rgba(10,5,25,0.45);border:1px solid rgba(167,139,250,0.3);border-radius:20px;
   padding:48px 44px;width:400px;text-align:center;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
   box-shadow:0 0 0 1px rgba(139,92,246,0.15);}
@@ -479,11 +479,13 @@ tbody td{padding:9px 13px;vertical-align:middle;}
     <div id="login-admin-form">
       <input class="inp" type="password" id="lp" placeholder="Admin password…" onkeydown="if(event.key==='Enter')doLogin()"/>
       <button class="btn btn-primary" onclick="doLogin()">Sign In as Admin</button>
+      <div style="margin-top:14px;font-size:12px;color:rgba(167,139,250,0.55);">Don't have an account? Get one at <a href="https://discord.gg/hxu" target="_blank" style="color:#a78bfa;text-decoration:none;">discord.gg/hxu</a></div>
     </div>
     <div id="login-reseller-form" style="display:none">
       <input class="inp" type="text" id="lr-user" placeholder="Username…" onkeydown="if(event.key==='Enter')doResellerLogin()"/>
       <input class="inp" type="password" id="lr-pass" placeholder="Password…" onkeydown="if(event.key==='Enter')doResellerLogin()"/>
       <button class="btn btn-primary" onclick="doResellerLogin()">Sign In as Reseller</button>
+      <div style="margin-top:14px;font-size:12px;color:rgba(167,139,250,0.55);">Don't have an account? Get one at <a href="https://discord.gg/hxu" target="_blank" style="color:#a78bfa;text-decoration:none;">discord.gg/hxu</a></div>
     </div>
     <div class="lerr" id="lerr"></div>
   </div>
@@ -2688,5 +2690,11 @@ async function rdel(url){const r=await fetch(url,{method:'DELETE',headers:{'x-re
 })();
 
 </script>
+
+<!-- Bottom-left copyright — login screen only -->
+<div id="login-footer" style="position:fixed;bottom:18px;left:22px;z-index:101;font-size:11px;color:rgba(167,139,250,0.45);font-family:system-ui,sans-serif;letter-spacing:.3px;pointer-events:none;">
+  Copyright &copy; Boost Empire 2026, All Rights Reserved
+</div>
+
 </body>
 </html>
