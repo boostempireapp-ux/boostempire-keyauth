@@ -28,16 +28,18 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 ::-webkit-scrollbar-thumb:hover{background:var(--p)}
 
 /* LOGIN */
+#galaxy-canvas{position:fixed;inset:0;z-index:99;pointer-events:none;}
 #login-screen{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;
-  background:radial-gradient(ellipse 80% 70% at 50% 0%,rgba(139,92,246,0.18) 0%,transparent 65%);}
-.login-box{background:rgba(8,8,8,0.97);border:1px solid var(--border2);border-radius:20px;
-  padding:48px 44px;width:400px;text-align:center;
-  box-shadow:0 0 0 1px rgba(139,92,246,0.12),0 40px 80px rgba(0,0,0,0.9),0 0 60px rgba(139,92,246,0.06);}
+  background:transparent;}
+.login-box{background:rgba(5,3,16,0.22);border:1px solid rgba(139,92,246,0.35);border-radius:20px;
+  padding:48px 44px;width:400px;text-align:center;backdrop-filter:blur(2px);
+  box-shadow:0 0 0 1px rgba(139,92,246,0.15);}
 .login-logo-img{width:72px;height:72px;object-fit:cover;border-radius:16px;margin:0 auto 16px;display:block;
   box-shadow:0 8px 32px rgba(139,92,246,0.4);}
 .brand-big{font-family:'Rajdhani',sans-serif;font-size:34px;font-weight:700;letter-spacing:4px;
-  background:linear-gradient(135deg,#c4b5fd 0%,#8b5cf6 50%,#6d28d9 100%);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;display:block;line-height:1;}
+  background:linear-gradient(135deg,#f3e8ff 0%,#c4b5fd 50%,#a78bfa 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;display:block;line-height:1;
+  filter:drop-shadow(0 0 12px rgba(167,139,250,0.7));}
 .brand-sub{font-size:10px;letter-spacing:5px;color:var(--text3);text-transform:uppercase;display:block;margin:4px 0 28px;}
 .inp{width:100%;padding:12px 15px;background:rgba(139,92,246,0.05);
   border:1px solid var(--border2);border-radius:var(--r);
@@ -395,7 +397,7 @@ tbody td{padding:9px 13px;vertical-align:middle;}
 .btn-gold:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(245,158,11,0.35);}
 .login-tabs{display:flex;border:1px solid var(--border2);border-radius:var(--r);overflow:hidden;margin-bottom:20px;}
 .login-tab{flex:1;padding:9px;font-size:12px;font-weight:600;cursor:pointer;color:var(--text3);transition:all .15s;text-align:center;}
-.login-tab.active{background:var(--pdim);color:var(--p3);}
+.login-tab.active{background:rgba(109,40,217,0.35);color:#e9d5ff;}
 .modal-wide{width:700px;}
 .perm-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
 .perm-item{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;transition:border-color .15s;}
@@ -464,6 +466,7 @@ tbody td{padding:9px 13px;vertical-align:middle;}
 <body>
 
 <!-- LOGIN -->
+<canvas id="galaxy-canvas"></canvas>
 <div id="login-screen">
   <div class="login-box">
     <img src="logo.png" class="login-logo-img" alt="BoostEmpire"/>
@@ -2598,6 +2601,156 @@ async function loadResellerBlocks(){if(!RDATA.permissions.viewBlocks){document.g
 async function rget(url){const r=await fetch(url,{headers:{'x-reseller-token':RTOKEN}});return r.json();}
 async function rpost(url,body={}){const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','x-reseller-token':RTOKEN},body:JSON.stringify(body)});return r.json();}
 async function rdel(url){const r=await fetch(url,{method:'DELETE',headers:{'x-reseller-token':RTOKEN}});return r.json();}
+
+
+// ── GALAXY BACKGROUND ──────────────────────────────────────────────────────
+(function() {
+  const canvas = document.getElementById('galaxy-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  function resize() {
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  // Star types: white stars + purple tinted stars + bright core stars
+  const STAR_COUNT   = 2200;
+  const NEBULA_COUNT = 6;
+
+  // Build stars
+  const stars = Array.from({ length: STAR_COUNT }, () => {
+    const isPurple = Math.random() < 0.28;
+    const isCore   = Math.random() < 0.06;
+    return {
+      x:       Math.random(),
+      y:       Math.random(),
+      size:    isCore ? (Math.random() * 2.2 + 1.2) : (Math.random() * 1.4 + 0.2),
+      alpha:   Math.random() * 0.7 + 0.3,
+      twinkle: Math.random() * Math.PI * 2,
+      speed:   Math.random() * 0.012 + 0.003,
+      purple:  isPurple,
+      core:    isCore,
+    };
+  });
+
+  // Spiral arm points (galaxy shape)
+  const ARM_STARS = 1100;
+  const armStars = Array.from({ length: ARM_STARS }, (_, i) => {
+    const arm     = i % 3;                          // 3 spiral arms
+    const t       = (i / ARM_STARS) * Math.PI * 4; // how far along the arm
+    const spread  = (Math.random() - 0.5) * 0.18;
+    const r       = t * 0.09 + Math.random() * 0.04;
+    const angle   = t + arm * ((Math.PI * 2) / 3) + spread;
+    const isPurp  = Math.random() < 0.45;
+    return {
+      r, angle,
+      size:    Math.random() * 1.8 + 0.3,
+      alpha:   Math.random() * 0.85 + 0.15,
+      twinkle: Math.random() * Math.PI * 2,
+      speed:   Math.random() * 0.01 + 0.002,
+      purple:  isPurp,
+    };
+  });
+
+  let frame = 0;
+
+  function drawGalaxy() {
+    const W = canvas.width, H = canvas.height;
+    const CX = W * 0.5, CY = H * 0.5;
+    const SCALE = Math.min(W, H) * 0.42;
+
+    // Deep space background
+    ctx.fillStyle = '#04020c';
+    ctx.fillRect(0, 0, W, H);
+
+    // Nebula clouds — soft radial glows
+    const nebulaData = [
+      { rx: 0.5,  ry: 0.5,  r: 0.50, color: '45,15,100',    a: 0.22 },
+      { rx: 0.5,  ry: 0.5,  r: 0.32, color: '85,35,185',    a: 0.26 },
+      { rx: 0.34, ry: 0.42, r: 0.22, color: '120,65,230',   a: 0.13 },
+      { rx: 0.66, ry: 0.56, r: 0.20, color: '110,55,215',   a: 0.12 },
+      { rx: 0.5,  ry: 0.5,  r: 0.14, color: '190,155,255',  a: 0.28 },
+      { rx: 0.5,  ry: 0.5,  r: 0.065,color: '235,225,255',  a: 0.38 },
+      { rx: 0.5,  ry: 0.5,  r: 0.028,color: '255,255,255',  a: 0.58 },
+    ];
+    nebulaData.forEach(n => {
+      const grd = ctx.createRadialGradient(W*n.rx, H*n.ry, 0, W*n.rx, H*n.ry, Math.min(W,H)*n.r);
+      grd.addColorStop(0,   `rgba(${n.color},${n.a})`);
+      grd.addColorStop(0.5, `rgba(${n.color},${n.a*0.4})`);
+      grd.addColorStop(1,   'rgba(0,0,0,0)');
+      ctx.fillStyle = grd;
+      ctx.fillRect(0, 0, W, H);
+    });
+
+    // Background scatter stars
+    stars.forEach(s => {
+      s.twinkle += s.speed;
+      const alpha = s.alpha * (0.65 + 0.35 * Math.sin(s.twinkle));
+      let color;
+      if (s.core)   color = `rgba(240,235,255,${alpha})`;
+      else if (s.purple) color = `rgba(${160 + Math.floor(Math.random()*40)},${80 + Math.floor(Math.random()*40)},255,${alpha})`;
+      else          color = `rgba(255,255,${230 + Math.floor(Math.random()*25)},${alpha})`;
+
+      ctx.beginPath();
+      ctx.arc(s.x * W, s.y * H, s.size, 0, Math.PI * 2);
+      ctx.fillStyle = color;
+      ctx.fill();
+
+      // Glow for bright stars
+      if (s.core && s.size > 1.8) {
+        const glow = ctx.createRadialGradient(s.x*W, s.y*H, 0, s.x*W, s.y*H, s.size*5);
+        glow.addColorStop(0, s.purple ? `rgba(160,80,255,${alpha*0.4})` : `rgba(220,210,255,${alpha*0.3})`);
+        glow.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = glow;
+        ctx.fillRect(s.x*W - s.size*5, s.y*H - s.size*5, s.size*10, s.size*10);
+      }
+    });
+
+    // Spiral arm stars
+    armStars.forEach(s => {
+      s.twinkle += s.speed;
+      const alpha = s.alpha * (0.6 + 0.4 * Math.sin(s.twinkle));
+      const x = CX + Math.cos(s.angle) * s.r * SCALE;
+      const y = CY + Math.sin(s.angle) * s.r * SCALE * 0.55; // flattened into ellipse
+
+      if (x < 0 || x > W || y < 0 || y > H) return;
+
+      const color = s.purple
+        ? `rgba(${150 + Math.floor(Math.random()*60)},${60 + Math.floor(Math.random()*60)},255,${alpha})`
+        : `rgba(255,255,${220 + Math.floor(Math.random()*35)},${alpha})`;
+
+      ctx.beginPath();
+      ctx.arc(x, y, s.size, 0, Math.PI * 2);
+      ctx.fillStyle = color;
+      ctx.fill();
+    });
+
+    // Bright galaxy core glow (center)
+    const coreGlow = ctx.createRadialGradient(CX, CY, 0, CX, CY, SCALE * 0.12);
+    coreGlow.addColorStop(0,   'rgba(255,248,255,0.55)');
+    coreGlow.addColorStop(0.3, 'rgba(200,160,255,0.20)');
+    coreGlow.addColorStop(0.7, 'rgba(120,60,200,0.08)');
+    coreGlow.addColorStop(1,   'rgba(0,0,0,0)');
+    ctx.fillStyle = coreGlow;
+    ctx.fillRect(0, 0, W, H);
+
+    frame++;
+    requestAnimationFrame(drawGalaxy);
+  }
+
+  // Only run when login screen is visible
+  const loginScreen = document.getElementById('login-screen');
+  const observer = new MutationObserver(() => {
+    const visible = loginScreen && loginScreen.style.display !== 'none';
+    canvas.style.display = visible ? 'block' : 'none';
+  });
+  if (loginScreen) observer.observe(loginScreen, { attributes: true, attributeFilter: ['style'] });
+
+  drawGalaxy();
+})();
 
 </script>
 </body>
